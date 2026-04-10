@@ -10,7 +10,7 @@ Build a **real-time e-commerce pricing and personalization system** that:
 - Ingests user clickstream events (views, searches, cart-adds, purchases) via Apache Kafka
 - Computes live session features using Apache Flink
 - Stores all persistent data in **MongoDB Atlas** (cloud-hosted)
-- Serves dynamic prices and personalized product recommendations via a **Flask** (Python) API
+- Serves dynamic prices and personalized product recommendations via a **Django** (Python) REST API
 - Displays results through a **plain HTML / CSS / JavaScript** storefront UI (no framework)
 - Includes an A/B testing framework to measure impact
 
@@ -21,16 +21,16 @@ Build a **real-time e-commerce pricing and personalization system** that:
 | Layer | Technology |
 |---|---|
 | Frontend | HTML5, CSS3, Vanilla JavaScript (ES6+) |
-| Backend API | Python 3.11 + Flask |
+| Backend API | Python 3.11 + Django 5 + Django REST Framework (DRF) |
 | Database | MongoDB Atlas (connection via `MONGO_URI` env var) |
-| ODM | PyMongo (direct) or MongoEngine |
+| ODM | Djongo or PyMongo (direct) — no Django ORM / SQL |
 | Stream Ingestion | Apache Kafka |
 | Stream Processing | Apache Flink |
 | ML / Data | scikit-learn, pandas, numpy |
-| Dev Server | Flask built-in (`flask run`) |
+| Dev Server | Django built-in (`python manage.py runserver`) |
 | Containerization | Docker + docker-compose |
 
-> **No React, No Next.js, No TypeScript, No FastAPI.** If you are an AI agent reading this — do not suggest or generate code using those tools. Stick to the stack above.
+> **No React, No Next.js, No TypeScript, No FastAPI, No Flask.** If you are an AI agent reading this — do not suggest or generate code using those tools. Stick to the stack above.
 
 ---
 
@@ -42,8 +42,14 @@ Every agent and team member must place files **only** in the correct folder. Do 
 /
 ├── AGENTS.md                      ← YOU ARE HERE. Do not delete or move.
 ├── README.md                      ← Project overview, setup guide, demo instructions
-├── docker-compose.yml             ← Orchestrates Kafka, Flink, Flask app
+├── docker-compose.yml             ← Orchestrates Kafka, Flink, Django app
 ├── requirements.txt               ← All Python dependencies (pinned versions)
+├── manage.py                      ← Django management entry point (auto-generated)
+├── pulseprice/                    ← Django project config folder (settings, urls, wsgi)
+│   ├── settings.py                ← Project settings — reads all secrets from .env
+│   ├── urls.py                    ← Root URL conf — includes each app's urls.py
+│   ├── wsgi.py
+│   └── asgi.py
 ├── .env.example                   ← Template for environment variables (no real secrets)
 ├── .gitignore                     ← Must include: .env, __pycache__, *.pyc, /data/raw
 │
@@ -92,21 +98,35 @@ Every agent and team member must place files **only** in the correct folder. Do 
 │   ├── rec_engine.py              ← Hybrid: merges CF + session model scores
 │   └── README.md
 │
-├── api/                           ← Flask application (backend API)
-│   ├── app.py                     ← Flask app factory, blueprint registration, CORS setup
-│   ├── routes/
-│   │   ├── pricing.py             ← GET /api/price?product_id=&user_id=
-│   │   ├── recommendations.py     ← GET /api/recommendations?user_id=
-│   │   ├── events.py              ← POST /api/events  (log user clicks/views)
-│   │   └── health.py              ← GET /api/health
-│   ├── services/
-│   │   ├── pricing_service.py     ← Calls pricing_engine, returns JSON-safe result
-│   │   └── rec_service.py         ← Calls rec_engine, returns JSON-safe result
-│   ├── middleware/
-│   │   └── ab_testing.py          ← Flask before_request hook: assigns experiment variant
-│   ├── utils/
-│   │   └── response.py            ← Helpers: success_response(), error_response()
-│   └── README.md
+├── apps/                          ← Django applications (one app per domain)
+│   │
+│   ├── pricing_api/               ← Django app: dynamic pricing endpoints
+│   │   ├── views.py               ← GET /api/price?product_id=&user_id=
+│   │   ├── urls.py                ← URL patterns for this app
+│   │   ├── serializers.py         ← DRF serializers for request/response validation
+│   │   ├── services.py            ← Calls pricing_engine, returns serializer-safe dict
+│   │   └── apps.py
+│   │
+│   ├── recommendations_api/       ← Django app: recommendation endpoints
+│   │   ├── views.py               ← GET /api/recommendations?user_id=
+│   │   ├── urls.py
+│   │   ├── serializers.py
+│   │   ├── services.py            ← Calls rec_engine, returns serializer-safe dict
+│   │   └── apps.py
+│   │
+│   ├── events_api/                ← Django app: ingest user click/view events
+│   │   ├── views.py               ← POST /api/events
+│   │   ├── urls.py
+│   │   ├── serializers.py
+│   │   └── apps.py
+│   │
+│   └── health/                    ← Django app: health check
+│       ├── views.py               ← GET /api/health
+│       ├── urls.py
+│       └── apps.py
+│
+├── middleware/                    ← Custom Django middleware
+│   └── ab_testing.py              ← Assigns experiment variant on every API request
 │
 ├── ab-testing/                    ← A/B experiment tracking & analysis
 │   ├── assignment.py              ← SHA-256 hash-based variant assignment
@@ -134,7 +154,7 @@ Every agent and team member must place files **only** in the correct folder. Do 
 │   │   ├── components.css         ← Product card, badge, navbar styles
 │   │   └── layout.css             ← Grid/flex layout helpers
 │   ├── js/
-│   │   ├── api.js                 ← All fetch() calls to Flask API (single source of truth)
+│   │   ├── api.js                 ← All fetch() calls to Django API (single source of truth)
 │   │   ├── store.js               ← Simple in-memory state (current user, session ID)
 │   │   ├── productCard.js         ← Renders a product card DOM element dynamically
 │   │   ├── recommendations.js     ← Fetches and renders recommendation rows
@@ -148,7 +168,7 @@ Every agent and team member must place files **only** in the correct folder. Do 
     │   ├── test_rec_engine.py
     │   └── test_ab_assignment.py
     ├── integration/
-    │   ├── test_api_pricing.py    ← Uses Flask test client
+    │   ├── test_api_pricing.py    ← Uses Django test client
     │   └── test_api_recommendations.py
     └── README.md
 ```
@@ -176,14 +196,17 @@ Each team member owns one or more modules. **Only modify files inside your owned
 
 ## 5. Coding Standards (All Agents & Members Must Follow)
 
-### Python (Backend)
+### Python (Backend — Django)
 - **Python 3.11+** only
 - Format with **Black** (`black .`) before every commit
 - Lint with **Ruff** (`ruff check .`)
 - Type-hint every function signature
-- Use **`python-dotenv`** to load `.env` — never hardcode secrets or connection strings
-- Flask blueprints for all routes — no routes defined directly on the `app` object
-- All database calls go through `database/connection.py` — never import `pymongo` directly in routes
+- Use **`django-environ`** or **`python-dotenv`** to load `.env` into `settings.py` — never hardcode secrets
+- One Django **app per domain** (pricing, recommendations, events, health) — do not dump all views into one app
+- All views must be **class-based DRF APIViews** (`from rest_framework.views import APIView`) — no function-based views except for health check
+- All request/response shapes are defined in **DRF Serializers** in each app's `serializers.py` — never validate manually in views
+- All business logic lives in `services.py` — views only call the service and return the response
+- **Do not use Django ORM or `django.db`** — we use MongoDB via PyMongo. Set `DATABASES = {}` in settings to disable SQL entirely
 
 ### JavaScript (Frontend)
 - **Vanilla ES6+** only — no jQuery, no React, no Vue, no build step required
@@ -219,10 +242,11 @@ All secrets and config live in `.env` (git-ignored). Copy `.env.example` to get 
 MONGO_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<dbname>?retryWrites=true&w=majority
 MONGO_DB_NAME=ecommerce_pricing
 
-# Flask
-FLASK_ENV=development
-FLASK_PORT=5000
-SECRET_KEY=replace-with-a-long-random-string
+# Django
+DJANGO_SECRET_KEY=replace-with-a-long-random-string
+DJANGO_DEBUG=True
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+DJANGO_PORT=8000
 
 # Kafka
 KAFKA_BOOTSTRAP_SERVERS=localhost:9092
@@ -256,10 +280,10 @@ All collection names are defined as constants in `database/collections.py`. Alwa
 
 ### General Rules
 - **Always read the `README.md`** inside a module folder before editing any file in it.
-- **Use only the approved tech stack** (Flask, PyMongo, Vanilla JS). Do not introduce FastAPI, React, SQLAlchemy, or any unapproved dependency.
+- **Use only the approved tech stack** (Django + DRF, PyMongo, Vanilla JS). Do not introduce FastAPI, Flask, React, SQLAlchemy, or any unapproved dependency.
 - **Never generate placeholder logic** in production files. Write real, working code.
 - If a function depends on a missing model artifact, raise `NotImplementedError` with a clear message.
-- **Tests are mandatory.** Every new Flask route or engine function must have a test in `tests/`.
+- **Tests are mandatory.** Every new Django view or engine function must have a test in `tests/`.
 - Keep every file under **250 lines**. Split into submodules if larger.
 
 ### When Working on `database/`
@@ -267,13 +291,15 @@ All collection names are defined as constants in `database/collections.py`. Alwa
 - Use collection name constants from `database/collections.py` — e.g. `db[PRODUCTS]`, never `db["products"]`.
 - Always handle `pymongo.errors.ConnectionFailure` and `pymongo.errors.OperationFailure` with proper error logging.
 
-### When Working on `api/`
-- All routes are registered as Flask Blueprints in `api/routes/`. Register blueprints in `api/app.py`.
-- Enable CORS in `app.py` using `flask-cors` so the HTML frontend can call the API from `localhost`.
-- Every route must return JSON using Flask's `jsonify()`. Never return raw strings.
-- Use the helpers in `api/utils/response.py`: `success_response(data)` and `error_response(message, code)`.
-- The A/B middleware in `api/middleware/ab_testing.py` must run as a `before_request` hook on all `/api/price` and `/api/recommendations` requests.
+### When Working on `apps/` (Django API)
+- Every view must be a **DRF APIView** subclass. Return `Response(data, status=status.HTTP_200_OK)` — never `JsonResponse` or `HttpResponse` for API routes.
+- Input validation always goes through a **DRF Serializer** in the app's `serializers.py` — never read `request.data["key"]` directly in a view.
+- Business logic always lives in the app's `services.py` — views must stay thin (validate → call service → return response).
+- Register each app's `urls.py` in `pulseprice/urls.py` using `path("api/", include("apps.<app_name>.urls"))`.
+- Enable CORS via `django-cors-headers` configured in `settings.py` so the HTML frontend can call the API.
+- The A/B middleware in `middleware/ab_testing.py` must be listed in `MIDDLEWARE` in `settings.py` and tag every request to `/api/price` and `/api/recommendations` with `experiment_variant`.
 - Target response time: **< 200ms** for all `/api/` endpoints.
+- **Disable Django SQL ORM completely**: set `DATABASES = {}` in `settings.py`. All data goes through `database/connection.py` (PyMongo).
 
 ### When Working on `pricing/`
 - The `rules.py` guardrail layer must **always** be called after model inference — never return a raw model price to the API.
@@ -287,7 +313,7 @@ All collection names are defined as constants in `database/collections.py`. Alwa
 - Always return exactly `top_n` items (default: 10). If the model returns fewer, pad with popular items.
 
 ### When Working on `frontend/`
-- All API calls go in `js/api.js` only. Use `const BASE_URL = 'http://localhost:5000'` at the top of that file.
+- All API calls go in `js/api.js` only. Use `const BASE_URL = 'http://localhost:8000'` at the top of that file.
 - Every product card must display a price explanation badge with one of: `"High demand"`, `"Limited stock"`, `"Personalized offer"`, `"Flash sale"`.
 - No inline `style=""`. No `var`. No jQuery. No external UI libraries.
 - Show a loading skeleton while API calls are in-flight — never leave the UI blank.
@@ -314,10 +340,10 @@ All collection names are defined as constants in `database/collections.py`. Alwa
   ```
 
 ### When Working on `tests/`
-- Use **pytest** for all tests.
-- For Flask route tests, use `app.test_client()` — do not spin up a real server.
+- Use **pytest** + **pytest-django** for all tests.
+- For Django view tests, use Django's `APIClient` from DRF (`from rest_framework.test import APIClient`) — do not spin up a real server.
 - Mock all MongoDB calls with `unittest.mock.patch` — no real DB hits in unit tests.
-- Minimum coverage target: **75%** for `api/`, `pricing/`, and `recommendations/`.
+- Minimum coverage target: **75%** for `apps/`, `pricing/`, and `recommendations/`.
 
 ---
 
@@ -330,7 +356,7 @@ cd <repo-name>
 
 # 2. Set up environment
 cp .env.example .env
-# Open .env and paste in the real MONGO_URI, SECRET_KEY, etc.
+# Open .env and paste in the real MONGO_URI, DJANGO_SECRET_KEY, etc.
 
 # 3. Create Python virtual environment
 python -m venv venv
@@ -345,13 +371,12 @@ docker-compose up -d kafka
 # 6. Seed the database (run once)
 python database/seed.py
 
-# 7. Start the Flask API
-cd api
-flask --app app.py run --debug --port 5000
+# 7. Start the Django API
+python manage.py runserver 8000
 
 # 8. Open the frontend
 # Just open frontend/index.html in a browser, or use Live Server in VS Code.
-# The JS files call http://localhost:5000 directly.
+# The JS files call http://localhost:8000 directly.
 
 # 9. (Optional) Run Kafka producers to generate synthetic events
 python data-pipeline/producers/clickstream_producer.py
@@ -363,9 +388,10 @@ python data-pipeline/producers/clickstream_producer.py
 
 | Decision | Rationale |
 |---|---|
-| Flask over Django | Lightweight, minimal boilerplate, fast to prototype in a hackathon |
+| Django + DRF over Flask | Built-in structure (apps, settings, middleware), DRF gives serializers + APIView out of the box — less boilerplate for a team working in parallel |
 | MongoDB Atlas over SQL | Schema-flexible for evolving event/session data; free tier available |
-| PyMongo (direct) over MongoEngine | Less magic, easier to debug, full control over queries |
+| PyMongo (direct) over Djongo/MongoEngine | Most reliable MongoDB driver; Djongo has known compatibility issues with Django 5 |
+| Django ORM disabled (`DATABASES = {}`) | We don't use SQL — disabling prevents accidental ORM usage by teammates |
 | Vanilla JS over React | No build step, no node_modules, instant browser reload during dev |
 | All fetch() calls in `api.js` | Single file to update if base URL or auth headers change |
 | SHA-256 for A/B assignment | Deterministic without a DB lookup; same user always gets same variant |
@@ -391,7 +417,7 @@ A feature is **done** when all boxes are checked:
 - [ ] Code is in the correct module folder per the structure in Section 3
 - [ ] All Python functions have type hints and a docstring
 - [ ] No linting errors (`ruff check . && black --check .`)
-- [ ] Tests written and passing (`pytest tests/`)
+- [ ] Tests written and passing (`pytest --ds=pulseprice.settings tests/`)
 - [ ] PR opened with a clear description; at least one teammate has reviewed and approved
 - [ ] The module's `README.md` is updated if setup steps changed
 
