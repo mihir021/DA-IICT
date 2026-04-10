@@ -1,1 +1,11 @@
-
+.env
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+pricing/model/artifacts/*
+!pricing/model/artifacts/.gitkeep
+recommendations/model/artifacts/*
+!recommendations/model/artifacts/.gitkeep
+data/raw/

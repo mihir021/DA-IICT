@@ -424,3 +424,12 @@ A feature is **done** when all boxes are checked:
 ---
 
 *Last updated: April 2026 | Update the Team Roles table (Section 4) with your name and module before your first commit.*
+# Grocery Admin Override
+
+This addendum supersedes older generic e-commerce wording below whenever there is a conflict.
+
+- The project should now be treated as a **grocery commerce** platform.
+- The first major product surface is the **grocery admin dashboard**.
+- Admin work should prioritize dashboard, catalog, inventory, and order operations.
+- Keep the approved stack unchanged: Django + DRF, PyMongo, vanilla HTML/CSS/JS.
+- Keep all secrets in `.env` only and never commit real credentials.

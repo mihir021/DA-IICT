@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>PulsePrice Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
+<style>
+:root {
+  --bg-primary: #13111A;
+  --bg-secondary: #1E1B2E;
+  --bg-card: #231F35;
+  --bg-card-hover: #2A2640;
+  --bg-input: #1A1728;
+  --accent-gold: #C9A96E;
+  --accent-rose: #B76E79;
+  --accent-blush: #E8C4B8;
+  --accent-mist: #F2EEF5;
+  --success: #7CB99A;
+  --warning: #C9A96E;
+  --danger: #B76E79;
+  --info: #8B7DB5;
+  --border-subtle: rgba(201, 169, 110, 0.10);
+  --border-medium: rgba(201, 169, 110, 0.22);
+  --border-strong: rgba(201, 169, 110, 0.45);
+  --border-rose: rgba(183, 110, 121, 0.25);
+  --text-primary: #F2EEF5;
+  --text-secondary: #E8C4B8;
+  --text-muted: #8A7E9A;
+  --text-gold: #C9A96E;
+  --text-rose: #B76E79;
+  --sidebar-width: 240px;
+  --sidebar-bg: #0F0D18;
+  --sidebar-border: rgba(201, 169, 110, 0.12);
+  --glow-gold: 0 0 24px rgba(201, 169, 110, 0.18);
+  --glow-rose: 0 0 24px rgba(183, 110, 121, 0.18);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.35);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg-primary); color: var(--text-secondary); font-family: 'DM Sans', sans-serif; font-weight: 300; }
+
+h1,h2,h3,h4,.metric,#pageTitle,.logo-text { font-family: "Cormorant Garamond", serif; font-weight: 500; color: var(--text-primary); }
+
+#pageTitle { font-size: 20px; font-weight: 500; margin: 0; }
+.section > h2, .section > h3 { font-size: 22px; margin-bottom: 24px; position: relative; }
+.section > h2::after, .section > h3::after { content: ''; display: block; width: 40px; height: 2px; background: var(--accent-gold); margin-top: 6px; }
+
+.card h3 { font-size: 16px; margin: 0 0 4px 0; }
+.card > .eyebrow + h3 { margin-bottom: 14px; }
+.card > .row > div > h3 { margin-top: 4px; }
+
+.app { display: flex; min-height: 100vh; }
+.side { position: fixed; inset: 0 auto 0 0; width: var(--sidebar-width); background: var(--sidebar-bg); border-right: 1px solid var(--sidebar-border); display: flex; flex-direction: column; z-index: 2; }
+.main { margin-left: var(--sidebar-width); flex: 1; padding: 18px; }
+
+.logo { padding: 22px 16px 12px; display: flex; align-items: center; gap: 12px; }
+.pulse-wrap { position: relative; width: 12px; height: 12px; display: grid; place-items: center; }
+.pulse { width: 8px; height: 8px; background: var(--accent-rose); transform: rotate(45deg); animation: goldPulse 2s ease-in-out infinite; }
+.logo-text { font-size: 20px; font-weight: 600; color: var(--accent-gold); }
+
+.meta { padding: 0 16px 20px; font-family: 'DM Sans', sans-serif; display: flex; flex-direction: column; gap: 4px; }
+.meta .text { font-size: 11px; font-weight: 300; color: var(--text-muted); }
+.meta-user { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+.avatar { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg, #B76E79, #C9A96E); color: #13111A; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; }
+.user-info { display: flex; flex-direction: column; }
+.user-info .name { font-size: 12px; color: var(--text-secondary); font-weight: 400; }
+.live { font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; margin-top: 2px;}
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); animation: liveBlink 2.5s ease-in-out infinite; }
+
+.nav { display: flex; flex-direction: column; gap: 4px; padding: 0 0 20px 0; flex: 1; }
+.nav button { height: 40px; padding: 0 16px; display: flex; align-items: center; gap: 10px; background: transparent; border: none; border-left: 2px solid transparent; color: var(--text-muted); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 400; cursor: pointer; transition: all 200ms ease; width: 100%; text-align: left; }
+.nav button:hover { background: rgba(201, 169, 110, 0.06); color: var(--text-secondary); }
+.nav button.active { background: rgba(201, 169, 110, 0.10); color: var(--accent-gold); border-left-color: var(--accent-gold); padding-left: 14px; }
+.nav-icon { width: 15px; font-style: normal; text-align: center; color: inherit; font-size: 15px; }
+.nav button .label { display: block; }
+
+.status { background: rgba(201, 169, 110, 0.05); border-top: 1px solid var(--border-subtle); padding: 12px 16px; }
+.status h4 { font-family: 'DM Sans', sans-serif; font-size: 10px; color: var(--text-muted); font-weight: 400; margin: 0 0 8px 0; text-transform:none;}
+.status .muted { display: flex; flex-direction: column; gap: 4px; }
+.status-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-secondary); font-family: 'DM Sans', sans-serif; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
+
+.topbar { background: var(--bg-secondary); border-bottom: 1px solid var(--border-subtle); height: 56px; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1; margin: -18px -18px 18px -18px; }
+.top-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.search, .select { background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 14px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text-secondary); transition: all 200ms ease; min-height: 40px; }
+.search::placeholder { color: var(--text-muted); }
+.search:focus, .select:focus { border-color: var(--border-strong); box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.12); outline: none; }
+.search { min-width: 250px; }
+.select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23C9A96E'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 14px; padding-right: 32px; }
+
+.btn { background: transparent; border: 1px solid var(--border-medium); border-radius: 8px; padding: 9px 16px; color: var(--text-secondary); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 400; cursor: pointer; transition: all 200ms ease; min-height: 40px; text-decoration:none; display:inline-flex; align-items:center;}
+.btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+.btn.out { padding: 7px 14px; }
+.btn.primary { background: linear-gradient(135deg, #B76E79 0%, #C9A96E 100%); color: #13111A; border: none; border-radius: 10px; padding: 13px 24px; font-size: 13px; font-weight: 500; letter-spacing: 0.02em; box-shadow: 0 4px 16px rgba(183, 110, 121, 0.30); }
+.btn.primary:hover { box-shadow: 0 6px 24px rgba(201, 169, 110, 0.40); transform: translateY(-1px); border-color: transparent;}
+.btn.primary:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(183, 110, 121, 0.30); }
+.btn.daterange { background: var(--bg-input); border-color: var(--border-subtle); padding: 7px 14px; }
+.btn.daterange:hover { color: var(--text-secondary); border-color: var(--border-medium); cursor: default; }
+
+.notif { background: transparent; border: none; position: relative; cursor: pointer; width: 40px; height: 40px; border-radius: 8px; transition: all 200ms ease; display: grid; place-items: center; color: var(--text-secondary); }
+.notif:hover { background: rgba(201, 169, 110, 0.08); }
+.notif i { font-size: 18px; font-style: normal; }
+.badge { position: absolute; top: 0; right: 0; width: 16px; height: 16px; background: var(--accent-rose); border-radius: 50%; color: white; display: grid; place-items: center; font-family: 'DM Sans', sans-serif; font-size: 9px; font-weight: 500; }
+
+#liveClock { font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--text-muted); font-weight: 400; letter-spacing: 0.04em; }
+
+.section { display: none; animation: fade .28s ease; }
+.section.active { display: block; }
+
+.grid { display: grid; gap: 16px; }
+.g4 { grid-template-columns: repeat(4, 1fr); }
+.g3 { grid-template-columns: repeat(3, 1fr); }
+.g2 { grid-template-columns: repeat(2, 1fr); }
+
+.card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 20px 22px; box-shadow: var(--shadow-card); transition: border-color 250ms ease, box-shadow 250ms ease, transform 200ms ease; }
+.card:hover { border-color: var(--border-medium); box-shadow: var(--glow-gold); transform: translateY(-2px); }
+
+.plotly-chart { width: 100%; min-height: 280px; border-radius: 10px; overflow: hidden; }
+.plotly-chart-sm { width: 100%; min-height: 260px; }
+
+.eyebrow { font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 400; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.metric { font-size: 32px; font-weight: 600; color: var(--text-primary); margin: 6px 0; }
+.muted { color: var(--text-muted); font-size: 11px; font-family: 'DM Sans', sans-serif; }
+
+.row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.row > div { flex: 1; }
+.icon { font-size: 20px; color: var(--accent-rose); display: flex; align-items: center; justify-content: center; width:44px; height:44px; background: rgba(183, 110, 121, 0.08); border-radius: 12px; border: 1px solid rgba(183, 110, 121, 0.15); margin-left: 12px; }
+
+.pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 11px; }
+.pill.ok { background: rgba(124, 185, 154, 0.15); color: var(--success); }
+.pill.warn { background: rgba(183, 110, 121, 0.15); color: var(--accent-rose); }
+.pill.vio { background: rgba(138, 126, 154, 0.15); color: var(--text-muted); }
+.pill.warning-state { background: rgba(201, 169, 110, 0.15); color: var(--accent-gold); }
+.pill.bad { background: rgba(183, 110, 121, 0.15); color: var(--accent-rose); }
+
+.table { overflow: auto; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 14px; margin-top: 14px; }
+table { width: 100%; border-collapse: collapse; min-width: 760px; }
+th { background: rgba(201, 169, 110, 0.06); border-bottom: 1px solid var(--border-subtle); padding: 12px 16px; text-align: left; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600; color: var(--accent-gold); letter-spacing: 0.08em; text-transform: uppercase; }
+td { border-bottom: 1px solid var(--border-subtle); padding: 13px 16px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 400; color: var(--text-secondary); }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: rgba(201, 169, 110, 0.04); }
+
+.tiny { background: transparent; border: 1px solid var(--border-medium); border-radius: 6px; padding: 4px 10px; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 400; color: var(--text-secondary); cursor: pointer; transition: all 200ms ease; }
+.tiny:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+
+.bars { display: grid; gap: 12px; margin-top: 14px; }
+.barhead { display: flex; justify-content: space-between; font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--text-secondary); gap:12px;}
+.barval { font-weight: 500; font-size: 12px; color: var(--accent-gold); }
+.track { height: 6px; border-radius: 4px; background: rgba(201, 169, 110, 0.08); overflow: hidden; margin-top: 6px; border: none; }
+.fill { height: 100%; background: linear-gradient(90deg, #B76E79, #C9A96E); border-radius: 4px; box-shadow:none;}
+.viofill { background: linear-gradient(90deg, #B76E79, #C9A96E); border-radius: 4px; }
+
+.progress { height: 6px; border-radius: 4px; background: rgba(201, 169, 110, 0.10); overflow: hidden; margin-top: 6px; }
+.progress > span { display: block; height: 100%; background: linear-gradient(90deg, #B76E79, #C9A96E); width:auto;}
+
+.terminal { background: #0A0812; border: 1px solid var(--border-subtle); border-radius: 10px; padding: 16px; }
+.feed { height: 240px; overflow: hidden; margin-top: 16px; font-family: Consolas, monospace; font-size: 12px; color: #C9A96E; line-height: 1.8; }
+.feed-line { animation: feedIn 0.3s ease; }
+@keyframes feedIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+
+.banner { background: rgba(201, 169, 110, 0.06); border:none; border-left: 3px solid var(--accent-gold); border-radius: 0 10px 10px 0; padding: 16px 20px; color: var(--text-secondary); font-family: 'DM Sans', sans-serif; font-size: 13px; margin-bottom: 24px; }
+.banner.warn { background: rgba(183, 110, 121, 0.08); border-left-color: var(--accent-rose); }
+
+.list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.tag { padding: 6px 12px; border-radius: 20px; background: rgba(201, 169, 110, 0.08); border: 1px solid var(--border-subtle); font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500; color: var(--accent-gold); }
+.tag.off { background: rgba(183, 110, 121, 0.08); border-color: rgba(183, 110, 121, 0.25); color: var(--accent-rose); text-decoration: none; }
+
+.hide-sm { display: inline; }
+
+.trend-up { display:inline-flex; align-items:center; padding: 3px 10px; border-radius:20px; font-size: 11px; font-weight:500; font-family:'DM Sans'; background: rgba(124, 185, 154, 0.15); color: var(--success); }
+.trend-down { display:inline-flex; align-items:center; padding: 3px 10px; border-radius:20px; font-size: 11px; font-weight:500; font-family:'DM Sans'; background: rgba(183, 110, 121, 0.15); color: var(--accent-rose); }
+.kpi-icon-up { color: var(--accent-rose); }
+
+.rank-1 { border: 1px solid rgba(201, 169, 110, 0.50); box-shadow: 0 0 32px rgba(201, 169, 110, 0.15); }
+.rank-1 .rank-badge { background: #C9A96E; color: #13111A; }
+.rank-2 { border: 1px solid rgba(183, 110, 121, 0.40); box-shadow: 0 0 24px rgba(183, 110, 121, 0.12); }
+.rank-2 .rank-badge { background: #B76E79; color: #13111A; }
+.rank-3 { border: 1px solid rgba(139, 125, 181, 0.35); }
+.rank-3 .rank-badge { background: #8B7DB5; color: #F2EEF5; }
+.rank-badge { border-radius: 20px; padding: 3px 10px; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500; }
+
+/* Toast notifications */
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 999; display: flex; flex-direction: column; gap: 8px; }
+.toast { background: var(--bg-card); border: 1px solid var(--border-medium); border-radius: 10px; padding: 14px 20px; font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--text-secondary); box-shadow: 0 8px 32px rgba(0,0,0,0.4); animation: toastIn 0.35s ease, toastOut 0.3s ease 4s forwards; max-width: 340px; display: flex; align-items: center; gap: 10px; }
+.toast .toast-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+@keyframes toastIn { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: none; } }
+@keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateY(-10px); } }
+
+@keyframes goldPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.15); opacity: 0.7; } }
+@keyframes liveBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+@media (max-width:1180px){.g4,.g3{grid-template-columns:repeat(2,minmax(0,1fr))}.g2{grid-template-columns:1fr}}
+@media (max-width:860px){.side{width:84px;padding:18px 10px}.main{margin-left:84px}.logo-text,.meta .text,.nav .label,.status .text,.status h4,.user-info,.nav button span {display:none}.nav button{justify-content:center;padding:0}.search{width:100%}.topbar{flex-direction:column;align-items:flex-start;height:auto;padding:10px}.top-actions{width:100%;justify-content:flex-start}.g4,.g3,.g2{grid-template-columns:1fr}}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: rgba(201, 169, 110, 0.25); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(201, 169, 110, 0.45); }
+</style>
+</head>
+<body>
+<div class="app"><aside class="side"><div class="logo"><div class="pulse-wrap"><div class="pulse"></div></div><span class="logo-text">PulsePrice</span></div><div class="meta"><div class="text">Admin Panel</div><div class="meta-user"><div class="avatar">AD</div><div class="user-info"><span class="name">Administrator</span><span class="live"><div class="live-dot"></div> <span class="hide-sm">Live</span></span></div></div></div><div class="nav"><button class="active" data-target="overview" data-title="Overview"><i class="nav-icon">OV</i> <span class="label">Overview</span></button><button data-target="pricing" data-title="Pricing Engine"><i class="nav-icon">PR</i> <span class="label">Pricing Engine</span></button><button data-target="recs" data-title="Recommendations"><i class="nav-icon">RC</i> <span class="label">Recommendations</span></button><button data-target="ab" data-title="A/B Experiments"><i class="nav-icon">AB</i> <span class="label">A/B Experiments</span></button><button data-target="products" data-title="Products"><i class="nav-icon">PD</i> <span class="label">Products</span></button><button data-target="users" data-title="Users & Segments"><i class="nav-icon">US</i> <span class="label">Users & Segments</span></button><button data-target="pipeline" data-title="Pipeline Monitor"><i class="nav-icon">PL</i> <span class="label">Pipeline Monitor</span></button><button data-target="fairness" data-title="Fairness Audit"><i class="nav-icon">FA</i> <span class="label">Fairness Audit</span></button></div><div class="status"><h4>System Status</h4><div class="muted"><div class="status-item"><div class="status-dot"></div> Kafka</div><div class="status-item"><div class="status-dot"></div> Flink</div><div class="status-item"><div class="status-dot"></div> MongoDB</div></div></div></aside><main class="main"><div class="topbar"><h1 id="pageTitle">Overview</h1><div class="top-actions"><span id="liveClock"></span><input class="search" type="search" placeholder="Search sections, products…"><div class="notif"><i>&#128276;</i><span class="badge">3</span></div><button class="btn out">Export CSV</button><div class="btn daterange">Last 7 days &#9662;</div></div></div>
+
+<!-- ═══════════ OVERVIEW ═══════════ -->
+<section class="section active" id="overview">
+  <div class="grid g4">
+    <div class="card kpi"><div class="row"><div><div class="eyebrow">Total Revenue Today</div><div class="metric" data-count="48320" data-prefix="$">0</div><div><span class="trend-up">▲ 12.4%</span><span class="muted" style="margin-left:6px;">vs yesterday</span></div></div><div class="icon kpi-icon-up"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div></div></div>
+    <div class="card kpi"><div class="row"><div><div class="eyebrow">Active Sessions</div><div class="metric" data-count="1847">0</div><div><span class="trend-up">▲ 8.1%</span><span class="muted" style="margin-left:6px;">live</span></div></div><div class="icon kpi-icon-up"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div></div></div>
+    <div class="card kpi"><div class="row"><div><div class="eyebrow">Prices Updated</div><div class="metric" data-count="23540">0</div><div class="muted">in last hour</div></div><div class="icon kpi-icon-up"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></div></div></div>
+    <div class="card kpi"><div class="row"><div><div class="eyebrow">Avg Order Value</div><div class="metric" data-count="67.4" data-prefix="$" data-decimals="2">0</div><div><span class="trend-down">▼ 3.2%</span></div></div><div class="icon kpi-icon-up"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div></div></div>
+  </div>
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card"><div class="row"><div><h3>Revenue Over Time</h3></div><span class="pill ok">Healthy Growth</span></div><div id="chartRevenue" class="plotly-chart"></div></div>
+    <div class="card"><h3>Price Adjustment Reasons</h3><div id="chartDonut" class="plotly-chart"></div></div>
+  </div>
+  <div class="card" style="margin-top:18px"><h3>Recent Price Changes</h3><div class="table"><table><thead><tr><th>Product Name</th><th>Category</th><th>Old</th><th>New</th><th>Reason</th><th>Time</th><th>Status</th><th></th></tr></thead><tbody><tr><td>Pulse Max Headphones</td><td>Electronics</td><td>$129</td><td>$139</td><td>High Demand</td><td>2 min ago</td><td><span class="pill ok">▲ Increased</span></td><td><button class="tiny">View</button></td></tr><tr><td>AeroFit Sneakers</td><td>Sports</td><td>$84</td><td>$76</td><td>Flash Sale</td><td>4 min ago</td><td><span class="pill bad">▼ Decreased</span></td><td><button class="tiny">View</button></td></tr><tr><td>Nova Skin Serum</td><td>Beauty</td><td>$38</td><td>$38</td><td>Stable</td><td>7 min ago</td><td><span class="pill vio">= Stable</span></td><td><button class="tiny">View</button></td></tr><tr><td>ZenDesk Lamp</td><td>Home</td><td>$52</td><td>$59</td><td>Limited Stock</td><td>12 min ago</td><td><span class="pill ok">▲ Increased</span></td><td><button class="tiny">View</button></td></tr><tr><td>CoreRun Jacket</td><td>Clothing</td><td>$110</td><td>$98</td><td>Personalized Offer</td><td>18 min ago</td><td><span class="pill bad">▼ Decreased</span></td><td><button class="tiny">View</button></td></tr><tr><td>Atlas Smartwatch</td><td>Electronics</td><td>$199</td><td>$214</td><td>High Demand</td><td>26 min ago</td><td><span class="pill ok">▲ Increased</span></td><td><button class="tiny">View</button></td></tr></tbody></table></div></div>
+</section>
+
+<!-- ═══════════ PRICING ═══════════ -->
+<section class="section" id="pricing">
+  <div class="grid g3">
+    <div class="card"><div class="row"><div><h3>Pricing Model Status</h3></div><span class="pill ok">● Active</span></div><div class="bars"><div class="barhead"><span>Model type</span><strong class="barval">Regression + Guardrails</strong></div><div class="barhead"><span>Last trained</span><strong class="barval">2h ago</strong></div><div class="barhead"><span>Accuracy</span><strong class="metric" style="font-size:1.4rem" data-count="87.3" data-suffix="%">0</strong></div></div></div>
+    <div class="card"><div class="row"><div><h3>Guardrail Rules</h3></div><button class="tiny">Edit</button></div><div class="bars"><div class="barhead"><span>◆ Min price</span><strong class="barval">cost × 1.10</strong></div><div class="barhead"><span>◆ Max discount</span><strong class="barval">30%</strong></div><div class="barhead"><span>◆ Compliance</span><strong class="barval">No protected attributes used</strong></div></div></div>
+    <div class="card"><h3>Live Demand Signals</h3><div class="bars"><div class="barhead"><span>Avg Demand Velocity</span><strong class="barval">142 views/min ↗</strong></div><div class="barhead"><span>Avg Inventory Ratio</span><strong class="barval">0.64</strong></div><div class="barhead"><span>Competitor Delta</span><strong class="barval">-2.3%</strong></div></div></div>
+  </div>
+  <div class="card" style="margin-top:18px"><h3>Top 10 Most Price-Changed Products Today</h3><div class="table"><table><thead><tr><th>Rank</th><th>Product</th><th>Category</th><th>Changes</th><th>Current</th><th>Margin</th><th>Trend</th></tr></thead><tbody><tr class="rank-1"><td><span class="rank-badge">#1</span></td><td>Atlas Smartwatch</td><td>Electronics</td><td>31</td><td>$214</td><td>34%</td><td><svg viewBox="0 0 72 26" width="72" height="26"><polyline points="2,20 14,18 26,15 38,12 50,10 70,5" fill="none" stroke="#C9A96E" stroke-width="2.5"/></svg></td></tr><tr class="rank-2"><td><span class="rank-badge">#2</span></td><td>Pulse Max Headphones</td><td>Electronics</td><td>28</td><td>$139</td><td>29%</td><td><svg viewBox="0 0 72 26" width="72" height="26"><polyline points="2,18 14,16 26,17 38,12 50,11 70,8" fill="none" stroke="#C9A96E" stroke-width="2.5"/></svg></td></tr><tr class="rank-3"><td><span class="rank-badge">#3</span></td><td>CoreRun Jacket</td><td>Clothing</td><td>25</td><td>$98</td><td>21%</td><td><svg viewBox="0 0 72 26" width="72" height="26"><polyline points="2,19 14,18 26,14 38,16 50,9 70,7" fill="none" stroke="#C9A96E" stroke-width="2.5"/></svg></td></tr><tr><td><span class="rank-badge">#4</span></td><td>ZenDesk Lamp</td><td>Home</td><td>22</td><td>$59</td><td>27%</td><td><svg viewBox="0 0 72 26" width="72" height="26"><polyline points="2,21 14,17 26,15 38,13 50,10 70,9" fill="none" stroke="#C9A96E" stroke-width="2.5"/></svg></td></tr><tr><td><span class="rank-badge">#5</span></td><td>Nova Skin Serum</td><td>Beauty</td><td>20</td><td>$38</td><td>18%</td><td><svg viewBox="0 0 72 26" width="72" height="26"><polyline points="2,17 14,16 26,18 38,13 50,14 70,11" fill="none" stroke="#C9A96E" stroke-width="2.5"/></svg></td></tr></tbody></table></div></div>
+  <div class="card" style="margin-top:18px"><h3>Price Distribution</h3><div id="chartPriceDist" class="plotly-chart-sm"></div></div>
+</section>
+
+<!-- ═══════════ RECOMMENDATIONS ═══════════ -->
+<section class="section" id="recs">
+  <div class="grid g4">
+    <div class="card kpi"><div class="eyebrow">Recommendation CTR</div><div class="metric" data-count="34.2" data-suffix="%">0</div><div><span class="trend-up">▲ strong</span><span class="muted" style="margin-left:6px;">response</span></div></div>
+    <div class="card kpi"><div class="eyebrow">Avg Recs per Session</div><div class="metric" data-count="8.4" data-decimals="1">0</div><div class="muted">blended pipeline</div></div>
+    <div class="card kpi"><div class="eyebrow">Cold Start Rate</div><div class="metric" data-count="12.1" data-suffix="%">0</div><div class="muted">sparse-history users</div></div>
+    <div class="card kpi"><div class="eyebrow">Model Accuracy</div><div class="metric" data-count="81.7" data-suffix="%">0</div><div class="muted">offline evaluation</div></div>
+  </div>
+  <div class="grid g2">
+    <div class="card"><h3>Session Model Performance</h3><div class="table"><table><thead><tr><th>User ID</th><th>Session</th><th>Viewed</th><th>Shown</th><th>Clicked</th><th>Conv</th></tr></thead><tbody><tr><td>usr_***44</td><td>08m 12s</td><td>17</td><td>10</td><td>4</td><td>✓</td></tr><tr><td>usr_***12</td><td>05m 45s</td><td>11</td><td>8</td><td>2</td><td>✓</td></tr><tr><td>usr_***98</td><td>10m 04s</td><td>26</td><td>12</td><td>6</td><td>✓</td></tr><tr><td>usr_***37</td><td>03m 11s</td><td>7</td><td>6</td><td>1</td><td>✓</td></tr><tr><td>usr_***20</td><td>09m 28s</td><td>19</td><td>10</td><td>5</td><td>✓</td></tr></tbody></table></div></div>
+    <div class="card"><h3>Top Recommended Categories Today</h3><div id="chartRecCats" class="plotly-chart-sm"></div></div>
+  </div>
+  <div class="card" style="margin-top:18px"><h3>Cold Start Signals Used</h3><div class="list"><span class="tag">Device Type ✓</span><span class="tag">Time of Day ✓</span><span class="tag">Referral Source ✓</span><span class="tag off">Geo Region ✗ (disabled)</span></div></div>
+</section>
+
+<!-- ═══════════ A/B EXPERIMENTS ═══════════ -->
+<section class="section" id="ab">
+  <div class="card" style="margin-bottom:18px"><h3>Active Experiments</h3><div class="table"><table><thead><tr><th>Experiment ID</th><th>Type</th><th>Variant A</th><th>Variant B</th><th>Split</th><th>Status</th><th>Start</th><th>Days</th></tr></thead><tbody><tr><td>exp_price_021</td><td>Pricing Strategy</td><td>Rule Baseline</td><td>Elastic Guardrail V2</td><td>50 / 50</td><td><span class="pill ok">● Running</span></td><td>2026-04-02</td><td>8</td></tr><tr><td>exp_rec_008</td><td>Rec Model</td><td>Hybrid CF</td><td>Session Boosted</td><td>60 / 40</td><td><span class="pill warning-state">⚠ Paused</span></td><td>2026-03-28</td><td>13</td></tr></tbody></table></div></div>
+  <div class="grid g2">
+    <div class="card"><div class="eyebrow">Variant A</div><h3>Baseline</h3><div class="bars"><div class="barhead"><span>Conversion Rate</span><strong class="barval">4.8%</strong></div><div class="barhead"><span>Avg Order Value</span><strong class="barval">$64.12</strong></div><div class="barhead"><span>Revenue per Session</span><strong class="barval">$3.08</strong></div><div class="barhead"><span>Sample Size</span><strong class="barval">18,240</strong></div></div><div style="margin-top:14px"><span class="pill warn">★ Benchmark variant</span></div></div>
+    <div class="card"><div class="eyebrow">Variant B</div><h3>New Strategy</h3><div class="bars"><div class="barhead"><span>Conversion Rate</span><strong class="barval">5.6%</strong></div><div class="barhead"><span>Avg Order Value</span><strong class="barval">$68.90</strong></div><div class="barhead"><span>Revenue per Session</span><strong class="barval">$3.86</strong></div><div class="barhead"><span>Sample Size</span><strong class="barval">18,011</strong></div></div><div style="margin-top:14px"><span class="pill ok">✓ 95% confident — Variant B winning</span></div></div>
+  </div>
+  <div class="card" style="margin-top:18px"><div class="row"><div><div class="eyebrow">Experiment Event Log</div><h3>Experiment Event Log</h3></div><span class="pill ok"><span style="animation:liveBlink 1.6s infinite;">●</span> live feed</span></div><div class="table"><table><thead><tr><th>Timestamp</th><th>User ID</th><th>Variant</th><th>Event</th><th>Product</th><th>Revenue</th></tr></thead><tbody><tr><td>18:41:11</td><td>usr_2847</td><td>B</td><td>impression</td><td>Atlas Smartwatch</td><td>—</td></tr><tr><td>18:41:18</td><td>usr_1103</td><td>B</td><td>click</td><td>Pulse Max Headphones</td><td>—</td></tr><tr><td>18:41:32</td><td>usr_6241</td><td>A</td><td>purchase</td><td>CoreRun Jacket</td><td>$98</td></tr><tr><td>18:41:48</td><td>usr_9011</td><td>B</td><td>purchase</td><td>Nova Skin Serum</td><td>$38</td></tr><tr><td>18:42:04</td><td>usr_3380</td><td>A</td><td>impression</td><td>ZenDesk Lamp</td><td>—</td></tr><tr><td>18:42:17</td><td>usr_6612</td><td>B</td><td>click</td><td>TrailFlex Bottle</td><td>—</td></tr><tr><td>18:42:39</td><td>usr_4502</td><td>B</td><td>purchase</td><td>Prime Knit Tee</td><td>$35</td></tr><tr><td>18:42:52</td><td>usr_1408</td><td>A</td><td>purchase</td><td>HomeAura Diffuser</td><td>$48</td></tr></tbody></table></div></div>
+</section>
+
+<!-- ═══════════ PRODUCTS ═══════════ -->
+<section class="section" id="products">
+  <div class="card" style="margin-bottom:18px"><div class="row"><div><h3>Products</h3></div><button class="btn primary">+ Add Product</button></div><div class="top-actions" style="margin-top:14px"><input class="search" type="search" placeholder="Search products, SKU, category"><select class="select"><option>All Categories</option><option>Electronics</option><option>Clothing</option><option>Sports</option><option>Home</option></select><select class="select"><option>All Price Ranges</option><option>$0-$25</option><option>$25-$50</option><option>$50-$100</option><option>$100+</option></select><select class="select"><option>All Status</option><option>Active</option><option>Paused</option><option>Out of Stock</option></select></div></div>
+  <div class="card"><div class="table"><table><thead><tr><th>SKU</th><th>Product Name</th><th>Category</th><th>Base Price</th><th>Current Price</th><th>Cost</th><th>Margin %</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead><tbody><tr><td>SKU_0442</td><td>Pulse Max Headphones</td><td>Electronics</td><td>$129</td><td>$139</td><td>$92</td><td style="color:var(--success)">34%</td><td style="color:var(--success)">114</td><td><span class="pill ok">● Active</span></td><td><button class="tiny">Edit</button> <button class="tiny">Pause</button></td></tr><tr><td>SKU_1892</td><td>CoreRun Jacket</td><td>Clothing</td><td>$110</td><td>$98</td><td>$77</td><td style="color:var(--warning)">21%</td><td style="color:var(--warning)">34</td><td><span class="pill ok">● Active</span></td><td><button class="tiny">Edit</button> <button class="tiny">Pause</button></td></tr><tr><td>SKU_0028</td><td>TrailFlex Bottle</td><td>Sports</td><td>$24</td><td>$22</td><td>$18</td><td style="color:var(--warning)">18%</td><td style="color:var(--success)">88</td><td><span class="pill ok">● Active</span></td><td><button class="tiny">Edit</button> <button class="tiny">Pause</button></td></tr><tr><td>SKU_0877</td><td>ZenDesk Lamp</td><td>Home</td><td>$52</td><td>$59</td><td>$43</td><td style="color:var(--warning)">27%</td><td style="color:var(--warning)">19</td><td><span class="pill ok">● Active</span></td><td><button class="tiny">Edit</button> <button class="tiny">Pause</button></td></tr><tr><td>SKU_0904</td><td>Nova Skin Serum</td><td>Beauty</td><td>$38</td><td>$38</td><td>$31</td><td style="color:var(--danger)">12%</td><td style="color:var(--danger)">8</td><td><span class="pill warning-state">⚠ Paused</span></td><td><button class="tiny">Edit</button> <button class="tiny">Pause</button></td></tr><tr><td>SKU_1430</td><td>Prime Knit Tee</td><td>Clothing</td><td>$35</td><td>$35</td><td>$24</td><td style="color:var(--success)">31%</td><td style="color:var(--success)">203</td><td><span class="pill ok">● Active</span></td><td><button class="tiny">Edit</button> <button class="tiny">Pause</button></td></tr><tr><td>SKU_2110</td><td>Atlas Smartwatch</td><td>Electronics</td><td>$199</td><td>$214</td><td>$141</td><td style="color:var(--success)">34%</td><td style="color:var(--warning)">27</td><td><span class="pill ok">● Active</span></td><td><button class="tiny">Edit</button> <button class="tiny">Pause</button></td></tr><tr><td>SKU_3018</td><td>HomeAura Diffuser</td><td>Home</td><td>$48</td><td>$48</td><td>$42</td><td style="color:var(--danger)">13%</td><td style="color:var(--danger)">0</td><td><span class="pill bad">✗ Out of Stock</span></td><td><button class="tiny">Edit</button> <button class="tiny">Pause</button></td></tr></tbody></table></div><div class="row" style="margin-top:14px"><div class="muted">Showing 1-8 of 5,000 products</div><div><button class="tiny">Prev</button> <button class="tiny">Next</button></div></div></div>
+</section>
+
+<!-- ═══════════ USERS & SEGMENTS ═══════════ -->
+<section class="section" id="users">
+  <div class="grid g3">
+    <div class="card kpi"><div class="eyebrow">Total Users</div><div class="metric" data-count="24871">0</div><div class="muted">all profiles</div></div>
+    <div class="card kpi"><div class="eyebrow">Active Today</div><div class="metric" data-count="1847">0</div><div class="muted">live engagement</div></div>
+    <div class="card kpi"><div class="eyebrow">New This Week</div><div class="metric" data-count="312">0</div><div class="muted">fresh arrivals</div></div>
+  </div>
+  <div class="grid g2" style="margin-top:18px">
+    <div class="card"><div class="row"><div><div class="eyebrow">High Spenders</div><h3>3,214 users</h3></div><span class="pill ok">Gold Segment</span></div><div class="bars"><div class="barhead"><span>WTP Score avg</span><strong class="barval">0.84</strong></div><div class="barhead"><span>Avg AOV</span><strong class="barval">$124</strong></div><div class="barhead"><span>Conversion</span><strong class="barval">8.2%</strong></div></div><div class="progress" style="margin-top:14px"><span style="width:36%"></span></div></div>
+    <div class="card"><div class="row"><div><div class="eyebrow">Bargain Hunters</div><h3>8,902 users</h3></div><span class="pill vio">Violet Segment</span></div><div class="bars"><div class="barhead"><span>WTP Score avg</span><strong class="barval">0.31</strong></div><div class="barhead"><span>Avg AOV</span><strong class="barval">$34</strong></div><div class="barhead"><span>Conversion</span><strong class="barval">3.1%</strong></div></div><div class="progress" style="margin-top:14px"><span style="width:52%"></span></div></div>
+    <div class="card"><div class="row"><div><div class="eyebrow">Regular Shoppers</div><h3>9,441 users</h3></div><span class="pill ok">Emerald Segment</span></div><div class="bars"><div class="barhead"><span>WTP Score avg</span><strong class="barval">0.57</strong></div><div class="barhead"><span>Avg AOV</span><strong class="barval">$67</strong></div><div class="barhead"><span>Conversion</span><strong class="barval">5.4%</strong></div></div><div class="progress" style="margin-top:14px"><span style="width:61%"></span></div></div>
+    <div class="card"><div class="row"><div><div class="eyebrow">New / Unknown</div><h3>3,314 users</h3></div><span class="pill warn">Cold Start</span></div><div class="bars"><div class="barhead"><span>WTP Score avg</span><strong class="barval">N/A</strong></div><div class="barhead"><span>Avg AOV</span><strong class="barval">N/A</strong></div><div class="barhead"><span>Cold Start</span><strong class="barval">Yes</strong></div></div><div class="progress" style="margin-top:14px"><span style="width:24%"></span></div></div>
+  </div>
+  <div class="grid g2" style="margin-top:18px">
+    <div class="card"><div class="eyebrow">Recent Session Features</div><h3>Recent Session Features</h3><div class="table"><table><thead><tr><th>User ID</th><th>Segment</th><th>Engagement</th><th>Categories Browsed</th><th>WTP Score</th><th>Last Active</th></tr></thead><tbody><tr><td>usr_***44</td><td>High Spenders</td><td>0.91</td><td>Electronics, Home</td><td>0.88</td><td>18:41</td></tr><tr><td>usr_***12</td><td>Bargain Hunters</td><td>0.52</td><td>Sports, Clothing</td><td>0.29</td><td>18:39</td></tr><tr><td>usr_***98</td><td>Regular Shoppers</td><td>0.76</td><td>Beauty, Home</td><td>0.58</td><td>18:37</td></tr><tr><td>usr_***37</td><td>New / Unknown</td><td>0.33</td><td>Books</td><td>N/A</td><td>18:35</td></tr><tr><td>usr_***20</td><td>Regular Shoppers</td><td>0.71</td><td>Electronics, Sports</td><td>0.62</td><td>18:33</td></tr><tr><td>usr_***73</td><td>Bargain Hunters</td><td>0.48</td><td>Clothing, Beauty</td><td>0.27</td><td>18:31</td></tr></tbody></table></div></div>
+    <div class="card"><div class="row"><div><div class="eyebrow">Behavior Matrix</div><h3>3D Scatter Matrix View</h3></div><span class="pill vio">AI Segment Surface</span></div><div id="chart3DScatter" class="plotly-chart" style="min-height:340px"></div><div class="muted">Points map high-value, engagement, and intent clusters across live segments.</div></div>
+  </div>
+</section>
+
+<!-- ═══════════ PIPELINE MONITOR ═══════════ -->
+<section class="section" id="pipeline">
+  <div class="grid g3">
+    <div class="card"><div class="eyebrow">Kafka</div><h3>Stream Broker</h3><div class="bars"><div class="barhead"><span>Status</span><span class="pill ok">Healthy</span></div><div class="barhead"><span>Messages / sec</span><strong class="barval">4,820</strong></div><div class="barhead"><span>Topics</span><strong class="barval">2</strong></div><div class="barhead"><span>Consumer Lag</span><strong class="barval">12ms</strong></div><div class="barhead"><span>Partitions</span><strong class="barval">6</strong></div></div></div>
+    <div class="card"><div class="eyebrow">Apache Flink</div><h3>Stream Processing</h3><div class="bars"><div class="barhead"><span>Status</span><span class="pill ok">Healthy</span></div><div class="barhead"><span>Jobs Running</span><strong class="barval">2</strong></div><div class="barhead"><span>Throughput</span><strong class="barval">3,104 events / sec</strong></div><div class="barhead"><span>Checkpointing</span><strong class="barval">Enabled</strong></div><div class="barhead"><span>Uptime</span><strong class="barval">14h 32m</strong></div></div></div>
+    <div class="card"><div class="eyebrow">MongoDB Atlas</div><h3>Primary Store</h3><div class="bars"><div class="barhead"><span>Status</span><span class="pill ok">Healthy</span></div><div class="barhead"><span>Connections</span><strong class="barval">48</strong></div><div class="barhead"><span>Avg Query</span><strong class="barval">8ms</strong></div><div class="barhead"><span>Storage Used</span><strong class="barval">2.4 GB</strong></div><div class="barhead"><span>Collections</span><strong class="barval">7</strong></div></div></div>
+  </div>
+  <div class="grid g2" style="margin-top:18px">
+    <div class="card terminal"><div class="row"><div><div class="eyebrow">Event Stream Feed</div><h3 style="color:#C9A96E">Live Kafka Stream</h3></div><span class="pill ok" style="animation:liveBlink 1.6s infinite">● Live</span></div><div class="feed" id="liveFeed"></div></div>
+    <div class="card"><div class="eyebrow">Throughput Chart</div><h3>Events / sec over 60 minutes</h3><div id="chartThroughput" class="plotly-chart-sm"></div></div>
+  </div>
+</section>
+
+<!-- ═══════════ FAIRNESS AUDIT ═══════════ -->
+<section class="section" id="fairness">
+  <div class="banner warn">Warning: Run the full fairness audit notebook before demo day. Last audit: 3 days ago.</div>
+  <div class="grid g3">
+    <div class="card"><div class="row"><div><div class="eyebrow">Protected Attribute Check</div><h3>PASSED</h3></div><span class="pill ok">Healthy</span></div><div class="muted">No race, gender, age, or religion attributes detected in model inputs.</div></div>
+    <div class="card"><div class="row"><div><div class="eyebrow">Price Floor Compliance</div><h3>PASSED</h3></div><span class="pill ok">Healthy</span></div><div class="muted">All 5,000 products are priced above cost x 1.10. Zero violations.</div></div>
+    <div class="card"><div class="row"><div><div class="eyebrow">Reason String Coverage</div><h3>PARTIAL</h3></div><span class="pill warn">Review</span></div><div class="muted">97.4% of price responses include a reason string. 62 responses missing reason field.</div></div>
+  </div>
+  <div class="grid g2" style="margin-top:18px">
+    <div class="card"><div class="eyebrow">Price Disparity by Segment</div><h3>Average Price Paid</h3><div id="chartDisparity" class="plotly-chart-sm"></div><div style="margin-top:14px"><span class="pill warn">Review Recommended</span></div></div>
+    <div class="card"><div class="eyebrow">Model Input Features Used</div><h3>Feature Governance</h3><div class="list"><span class="tag">demand_velocity</span><span class="tag">inventory_ratio</span><span class="tag">competitor_price</span><span class="tag">user_wtp_score</span><span class="tag">hour_of_day</span><span class="tag off">user_age</span><span class="tag off">user_gender</span><span class="tag off">user_location</span></div></div>
+  </div>
+</section>
+
+</main></div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+/* ═══════════ NAV & COUNTERS ═══════════ */
+const nav=[...document.querySelectorAll('.nav button')];
+const sections=[...document.querySelectorAll('.section')];
+const pageTitle=document.getElementById('pageTitle');
+nav.forEach(button=>{button.addEventListener('click',()=>{nav.forEach(item=>item.classList.remove('active'));sections.forEach(section=>section.classList.remove('active'));button.classList.add('active');document.getElementById(button.dataset.target).classList.add('active');pageTitle.textContent=button.dataset.title;window.scrollTo({top:0,behavior:'smooth'});
+// Re-render Plotly charts when switching tabs (Plotly needs visible container)
+setTimeout(()=>{ window.dispatchEvent(new Event('resize')); },100);
+});});
+
+document.querySelectorAll('[data-count]').forEach(el=>{const target=Number(el.dataset.count);const decimals=Number(el.dataset.decimals||(String(target).includes('.')?1:0));const prefix=el.dataset.prefix||'';const suffix=el.dataset.suffix||'';const start=performance.now();const step=now=>{const progress=Math.min((now-start)/1500,1);const eased=1-Math.pow(1-progress,4);const value=target*eased;const formatted=decimals?value.toLocaleString(undefined,{minimumFractionDigits:decimals,maximumFractionDigits:decimals}):Math.round(value).toLocaleString();el.textContent=prefix+formatted+suffix;if(progress<1){requestAnimationFrame(step);}};requestAnimationFrame(step);});
+
+/* ═══════════ LIVE CLOCK ═══════════ */
+function updateClock(){const d=new Date();document.getElementById('liveClock').textContent=d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});}
+updateClock(); setInterval(updateClock,1000);
+
+/* ═══════════ TOAST NOTIFICATIONS ═══════════ */
+function showToast(msg, color='#C9A96E'){
+  const c=document.getElementById('toastContainer');
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=`<span class="toast-dot" style="background:${color}"></span>${msg}`;
+  c.appendChild(t);
+  setTimeout(()=>t.remove(),4500);
+}
+setTimeout(()=>showToast('Price updated: Atlas Smartwatch → $214','#7CB99A'),3000);
+setTimeout(()=>showToast('Low stock alert: ZenDesk Lamp (19 units)','#B76E79'),7000);
+setTimeout(()=>showToast('A/B exp_price_021: Variant B leading +16.7%','#8B7DB5'),12000);
+
+/* ═══════════ API CONFIG ═══════════ */
+const API = 'http://localhost:5000/api';
+async function api(path) {
+  try {
+    const r = await fetch(`${API}${path}`);
+    if (!r.ok) throw new Error(r.statusText);
+    return await r.json();
+  } catch(e) { console.warn(`API ${path} failed:`, e); return null; }
+}
+
+/* ═══════════ PLOTLY THEME ═══════════ */
+const plotlyLayout = {
+  paper_bgcolor: 'rgba(0,0,0,0)',
+  plot_bgcolor: 'rgba(0,0,0,0)',
+  font: { family: 'DM Sans', color: '#8A7E9A', size: 11 },
+  margin: { l: 50, r: 20, t: 10, b: 40 },
+  xaxis: { gridcolor: 'rgba(201,169,110,0.06)', zerolinecolor: 'rgba(201,169,110,0.1)', tickfont:{color:'#8A7E9A'} },
+  yaxis: { gridcolor: 'rgba(201,169,110,0.06)', zerolinecolor: 'rgba(201,169,110,0.1)', tickfont:{color:'#8A7E9A'} },
+  hoverlabel: { bgcolor: '#231F35', bordercolor: '#C9A96E', font: { family:'DM Sans', color:'#F2EEF5', size:12 } },
+};
+const plotlyConfig = { displayModeBar: false, responsive: true };
+
+/* ═══════════ LOAD ALL DATA FROM MONGODB ═══════════ */
+(async function loadDashboard() {
+
+  /* --- 1. REVENUE CHART (from MongoDB) --- */
+  const revData = await api('/revenue');
+  const revDays = revData ? revData.map(d=>d.day) : ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const revVals = revData ? revData.map(d=>d.revenue) : [8200,14800,22100,28400,35600,42100,48320];
+  Plotly.newPlot('chartRevenue', [{
+    x: revDays, y: revVals, type: 'scatter', mode: 'lines+markers',
+    fill: 'tozeroy', fillcolor: 'rgba(201,169,110,0.12)',
+    line: { color: '#C9A96E', width: 3, shape: 'spline' },
+    marker: { color: '#C9A96E', size: 7, line: { color: '#13111A', width: 2 } },
+    hovertemplate: '<b>%{x}</b><br>$%{y:,.0f}<extra></extra>',
+  }], { ...plotlyLayout, yaxis: { ...plotlyLayout.yaxis, tickprefix:'$', tickformat:',.0s' } }, plotlyConfig);
+
+  /* --- 2. DONUT CHART (from MongoDB) --- */
+  const reasons = await api('/adjustment-reasons');
+  const donutLabels = reasons ? reasons.map(r=>r.reason) : ['High Demand','Limited Stock','Personalized','Flash Sale'];
+  const donutVals = reasons ? reasons.map(r=>r.percentage) : [42,28,18,12];
+  const totalUpdates = reasons ? reasons.reduce((s,r)=>s+r.count,0) : 23540;
+  Plotly.newPlot('chartDonut', [{
+    values: donutVals, labels: donutLabels, type: 'pie', hole: 0.65,
+    marker: { colors: ['#C9A96E','#B76E79','#7CB99A','#8B7DB5'], line:{color:'#231F35',width:2} },
+    textinfo: 'label+percent', textposition: 'outside',
+    textfont: { family:'DM Sans', size:11, color:'#E8C4B8' },
+    hovertemplate: '<b>%{label}</b><br>%{value}% of updates<extra></extra>',
+    pull: [0.03, 0, 0, 0],
+  }], { ...plotlyLayout, margin:{l:10,r:10,t:10,b:10}, showlegend:false,
+    annotations:[{text:`<b style="font-size:22px;color:#F2EEF5;font-family:Cormorant Garamond">${totalUpdates.toLocaleString()}</b><br><span style="font-size:11px;color:#8A7E9A">updates</span>`,showarrow:false,font:{size:14},x:0.5,y:0.5}],
+  }, plotlyConfig);
+
+  /* --- 3. PRICE DISTRIBUTION (from MongoDB) --- */
+  const pe = await api('/pricing-engine');
+  if (pe && pe.price_distribution) {
+    const pd = pe.price_distribution.reverse();
+    Plotly.newPlot('chartPriceDist', [{
+      y: pd.map(d=>d.range), x: pd.map(d=>d.pct), type:'bar', orientation:'h',
+      marker:{color:['rgba(139,125,181,0.7)','rgba(139,125,181,0.55)','rgba(183,110,121,0.6)','rgba(201,169,110,0.7)','rgba(201,169,110,0.5)'],cornerradius:4},
+      text: pd.map(d=>d.pct+'%'), textposition:'outside', textfont:{color:'#C9A96E',size:12,family:'DM Sans'},
+      hovertemplate: '<b>%{y}</b>: %{x}%<extra></extra>',
+    }], { ...plotlyLayout, margin:{l:80,r:50,t:5,b:30}, xaxis:{...plotlyLayout.xaxis,title:{text:'% of products',font:{size:11,color:'#8A7E9A'}},range:[0,42]}, yaxis:{...plotlyLayout.yaxis,automargin:true}, height:250 }, plotlyConfig);
+  }
+
+  /* --- 4. TOP RECOMMENDED CATEGORIES (from MongoDB) --- */
+  const recData = await api('/recommendations');
+  if (recData && recData.top_categories) {
+    const cats = recData.top_categories.reverse();
+    Plotly.newPlot('chartRecCats', [{
+      y: cats.map(c=>c.name), x: cats.map(c=>c.count), type:'bar', orientation:'h',
+      marker:{color:'rgba(201,169,110,0.5)',line:{color:'#C9A96E',width:1}},
+      text: cats.map(c=>c.count.toLocaleString()), textposition:'outside', textfont:{color:'#C9A96E',size:11,family:'DM Sans'},
+      hovertemplate: '<b>%{y}</b><br>%{x:,} recommendations<extra></extra>',
+    }], { ...plotlyLayout, margin:{l:80,r:60,t:5,b:30}, xaxis:{...plotlyLayout.xaxis,range:[0,5800]}, yaxis:{...plotlyLayout.yaxis,automargin:true}, height:260 }, plotlyConfig);
+  }
+
+  /* --- 5. 3D SCATTER (Users Behavior) --- */
+  const segs = await api('/user-segments');
+  const segNames = segs ? segs.map(s=>s.name) : ['High Spenders','Regular','Bargain','New/Unknown'];
+  const segColors=['#C9A96E','#7CB99A','#B76E79','#8B7DB5'];
+  const traces3d=[];
+  segNames.forEach((seg,i)=>{
+    const x=[],y=[],z=[];
+    for(let j=0;j<20;j++){
+      x.push(+(Math.random()*0.4+i*0.25).toFixed(2));
+      y.push(+(Math.random()*0.8+0.1).toFixed(2));
+      z.push(+(Math.random()*0.7+0.15).toFixed(2));
+    }
+    traces3d.push({x,y,z,mode:'markers',type:'scatter3d',name:seg,marker:{size:4,color:segColors[i%4],opacity:0.85},
+      hovertemplate:`<b>${seg}</b><br>Value: %{x}<br>Engagement: %{y}<br>Intent: %{z}<extra></extra>`});
+  });
+  Plotly.newPlot('chart3DScatter', traces3d, {
+    paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',font:{family:'DM Sans',color:'#8A7E9A',size:10},margin:{l:0,r:0,t:0,b:0},
+    scene:{xaxis:{title:'Value',gridcolor:'rgba(201,169,110,0.06)',backgroundcolor:'rgba(0,0,0,0)',zerolinecolor:'rgba(201,169,110,0.08)'},yaxis:{title:'Engagement',gridcolor:'rgba(201,169,110,0.06)',backgroundcolor:'rgba(0,0,0,0)',zerolinecolor:'rgba(201,169,110,0.08)'},zaxis:{title:'Intent',gridcolor:'rgba(201,169,110,0.06)',backgroundcolor:'rgba(0,0,0,0)',zerolinecolor:'rgba(201,169,110,0.08)'},bgcolor:'rgba(0,0,0,0)',camera:{eye:{x:1.6,y:1.6,z:0.8}}},
+    showlegend:true,legend:{font:{color:'#E8C4B8',size:10},bgcolor:'rgba(0,0,0,0)'},hoverlabel:{bgcolor:'#231F35',bordercolor:'#C9A96E',font:{family:'DM Sans',color:'#F2EEF5',size:11}},height:340,
+  }, plotlyConfig);
+
+  /* --- 6. THROUGHPUT BAR CHART (from MongoDB) --- */
+  const tpData = await api('/throughput');
+  const tLabels = tpData ? tpData.map(d=>d.label) : ['-55m','-50m','-45m','-40m','-35m','-30m','-25m','-20m','-15m','-10m','-5m','now'];
+  const tVals = tpData ? tpData.map(d=>d.value) : [2100,2800,2500,3200,3700,3100,3300,3900,3500,3800,4100,4820];
+  Plotly.newPlot('chartThroughput', [{
+    x: tLabels, y: tVals, type: 'bar',
+    marker: { color: tVals.map((_,i)=>`rgba(201,169,110,${0.35+i*0.05})`), cornerradius: 4 },
+    hovertemplate: '<b>%{x}</b><br>%{y:,} events/sec<extra></extra>',
+  }], { ...plotlyLayout, margin:{l:50,r:20,t:5,b:35}, yaxis:{...plotlyLayout.yaxis,title:{text:'events/sec',font:{size:10,color:'#8A7E9A'}}}, height:260 }, plotlyConfig);
+
+  /* --- 7. PRICE DISPARITY (from MongoDB) --- */
+  const fair = await api('/fairness');
+  if (fair && fair.disparity) {
+    const dp = fair.disparity.reverse();
+    Plotly.newPlot('chartDisparity', [{
+      y: dp.map(d=>d.segment), x: dp.map(d=>d.avg_price), type:'bar', orientation:'h',
+      marker:{color:['#8B7DB5','#B76E79','#7CB99A','#C9A96E'],cornerradius:4},
+      text: dp.map(d=>'$'+d.avg_price), textposition:'outside', textfont:{color:'#E8C4B8',size:12,family:'DM Sans'},
+      hovertemplate: '<b>%{y}</b><br>Avg $%{x}<extra></extra>',
+    }], { ...plotlyLayout, margin:{l:110,r:50,t:5,b:30}, xaxis:{...plotlyLayout.xaxis,tickprefix:'$',range:[0,120]}, yaxis:{...plotlyLayout.yaxis,automargin:true}, height:240 }, plotlyConfig);
+  }
+
+  /* --- Show connection status toast --- */
+  const health = await api('/health');
+  if (health && health.status === 'ok') {
+    showToast(`Connected to MongoDB: ${health.db} (${health.collections.length} collections)`, '#7CB99A');
+  } else {
+    showToast('Running in offline mode — using cached data', '#B76E79');
+  }
+
+})();
+
+/* ═══════════ LIVE TERMINAL FEED ═══════════ */
+const feedEl = document.getElementById('liveFeed');
+const feedEvents = [
+  'event=view product_id=SKU_0442 category=Electronics',
+  'event=cart_add product_id=SKU_1892 category=Sports',
+  'event=price_eval product_id=SKU_2110 margin=0.34',
+  'event=recommendation_shown category=Beauty session=ses_2301',
+  'event=purchase product_id=SKU_0877 revenue=59',
+  'event=view product_id=SKU_0028 category=Sports',
+  'event=segment_update user_segment=bargain_hunter',
+  'event=inventory_sync sku=SKU_3018 stock=0',
+  'event=click product_id=SKU_1430 category=Clothing',
+  'event=purchase product_id=SKU_2110 revenue=214',
+  'event=view product_id=SKU_0904 category=Beauty',
+  'event=cart_add product_id=SKU_0442 category=Electronics',
+];
+let feedLines = [];
+function addFeedLine(){
+  const d = new Date();
+  const ts = d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const uid = 'usr_'+String(Math.floor(1000+Math.random()*9000));
+  const ev = feedEvents[Math.floor(Math.random()*feedEvents.length)];
+  const line = `[${ts}] user_id=${uid} ${ev}`;
+  feedLines.push(line);
+  if(feedLines.length>18) feedLines.shift();
+  feedEl.innerHTML = feedLines.map(l=>`<div class="feed-line">${l}</div>`).join('');
+  feedEl.scrollTop = feedEl.scrollHeight;
+}
+for(let i=0;i<12;i++) addFeedLine();
+setInterval(addFeedLine, 2200);
+
+</script>
+</body>
+</html>

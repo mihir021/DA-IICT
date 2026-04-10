@@ -1,0 +1,250 @@
+.admin-sidebar {
+  padding: 28px 22px;
+  background: linear-gradient(180deg, #163527 0%, #214733 100%);
+  color: #effaf1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.brand-kicker {
+  color: #a9f2b2;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.76rem;
+}
+
+.sidebar-copy {
+  margin-top: 12px;
+  color: rgba(239, 250, 241, 0.72);
+  line-height: 1.6;
+}
+
+.sidebar-nav {
+  display: grid;
+  gap: 12px;
+  margin: 28px 0;
+}
+
+.sidebar-nav a,
+.sidebar-footer span {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-footer {
+  display: grid;
+  gap: 10px;
+}
+
+.hero-panel {
+  padding: 24px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #19442f, #2d7b4e 60%, #ef9a48);
+  color: #f6fff7;
+}
+
+.hero-copy {
+  max-width: 640px;
+  margin-top: 10px;
+  color: rgba(246, 255, 247, 0.78);
+  line-height: 1.6;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.login-panel {
+  padding: 24px 28px;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 24px;
+}
+
+.login-form {
+  display: grid;
+  gap: 14px;
+}
+
+.login-form label {
+  display: grid;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.login-form input {
+  min-height: 46px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.dashboard-panel {
+  display: grid;
+  gap: 20px;
+}
+
+.kpi-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-card::after {
+  content: "";
+  position: absolute;
+  inset: auto -16px -42px auto;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, rgba(46, 139, 87, 0.18), transparent 70%);
+}
+
+.kpi-value {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  margin-top: 10px;
+}
+
+.kpi-note {
+  margin-top: 10px;
+  color: var(--muted);
+}
+
+.bar-row,
+.order-row,
+.alert-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--line);
+}
+
+.bar-track {
+  height: 10px;
+  border-radius: 999px;
+  background: #e4ebe4;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--accent), var(--accent-warm));
+}
+
+.donut-wrap {
+  display: grid;
+  place-items: center;
+  gap: 16px;
+}
+
+.donut-ring {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+}
+
+.legend-list {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+}
+
+.legend-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.legend-dot {
+  display: inline-flex;
+  margin-right: 8px;
+}
+
+.legend-dot-1 {
+  color: #2e8b57;
+}
+
+.legend-dot-2 {
+  color: #ff8f3d;
+}
+
+.legend-dot-3 {
+  color: #f2b541;
+}
+
+.line-chart {
+  width: 100%;
+  height: 280px;
+}
+
+.chart-host-3d {
+  perspective: 1000px;
+}
+
+.bars-3d {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  min-height: 250px;
+  padding-top: 10px;
+}
+
+.bar-3d {
+  width: 52px;
+}
+
+.bar-3d-column {
+  width: 52px;
+  background: linear-gradient(180deg, #2e8b57, #1c5d3a);
+  border-radius: 10px 10px 6px 6px;
+  transform: rotateX(-12deg) rotateY(-24deg);
+  transform-origin: bottom center;
+  box-shadow: 18px 18px 34px rgba(19, 32, 23, 0.16);
+}
+
+.bar-3d-label {
+  margin-top: 10px;
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+
+.alert-card.high {
+  border-left: 4px solid var(--danger);
+}
+
+.alert-card.medium {
+  border-left: 4px solid var(--warning);
+}
+
+.skeleton {
+  min-height: 180px;
+  border-radius: 20px;
+  background: linear-gradient(90deg, rgba(240, 244, 240, 0.9), rgba(225, 234, 226, 0.9), rgba(240, 244, 240, 0.9));
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (max-width: 1080px) {
+  .hero-panel,
+  .login-panel {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: start;
+  }
+}
