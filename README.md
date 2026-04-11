@@ -1,10 +1,14 @@
-# GroceryPulse Admin
+# BasketIQ (DA-IICT + Wish2Cart)
+
+Merged codebase from Yashvi's Wish2Cart and Mihir's DA-IICT repositories.
+
+## GroceryPulse Admin Overview
 
 GroceryPulse is a grocery-first pricing, personalization, and operations platform built with Django, MongoDB Atlas, and a vanilla HTML/CSS/JS frontend.
 
 ## Current Focus
 
-The first implemented feature is a grocery admin dashboard with:
+The implemented feature set includes a grocery admin dashboard with:
 - staff login
 - revenue, orders, stock, and category KPIs
 - interactive 2D analytics
