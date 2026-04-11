@@ -20,6 +20,12 @@ load_dotenv(BASE_DIR / ".env")
 app = Flask(__name__)
 CORS(app)  # Allow frontend to connect
 
+
+@app.route("/")
+def serve_frontend():
+    from flask import send_from_directory
+    return send_from_directory(str(BASE_DIR / "frontend"), "admin.html")
+
 MONGO_URI = os.getenv("MONGO_URI")
 DB_NAME = os.getenv("MONGO_DB_NAME", "pulseprice_admin")
 
@@ -137,12 +143,16 @@ def fairness():
 # ──────────── TOTAL USERS COUNT ────────────
 @app.route("/api/user-counts")
 def user_counts():
+    doc = db["user_counts"].find_one({}, {"_id": 0})
+    if doc:
+        return jsonify(doc)
+    # fallback: aggregate from segments
     segments = list(db["user_segments"].find({}, {"_id": 0}))
     total = sum(s.get("count", 0) for s in segments)
     return jsonify({
         "total_users": total,
-        "active_today": 1847,
-        "new_this_week": 312,
+        "active_today": 0,
+        "new_this_week": 0,
     })
 
 

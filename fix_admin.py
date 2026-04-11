@@ -1,45 +1,145 @@
-with open("frontend/admin.html", "r", encoding="utf-8") as f:
-    html = f.read()
+"""
+Fix admin.html:
+1. Move Forecasting Lab JS back inside <script> tag
+2. Replace old Electronics/Sports feed with grocery feed
+3. Fix closing tags
+"""
 
-# Fix donut chart track duplicate stroke-width
-html = html.replace(
-    'stroke="rgba(201, 169, 110, 0.08)" stroke-width="0.5" stroke-width="28"',
-    'stroke="rgba(201, 169, 110, 0.08)" stroke-width="28"'
-)
+SRC = r"e:\DA IICT V.01\DA-IICT\frontend\admin.html"
 
-# Fix empty KPI icons by adding a decorative diamond symbol
-html = html.replace(
-    '<div class="icon kpi-icon-up"></div>',
-    '<div class="icon kpi-icon-up">❖</div>'
-)
+with open(SRC, "r", encoding="utf-8") as f:
+    lines = f.readlines()
 
-# Fix random question marks from encoding issues in the original file
-html = html.replace('<span>? Min price</span>', '<span>◆ Min price</span>')
-html = html.replace('<span>? Max discount</span>', '<span>◆ Max discount</span>')
-html = html.replace('<span>? Compliance</span>', '<span>◆ Compliance</span>')
+print(f"Original lines: {len(lines)}")
 
-html = html.replace('142 views/min ?', '142 views/min ↗')
+# Keep lines 1-805 (the good part: CSS + HTML + dynamic JS)
+# Line 806 is </script> — we keep it but move it to the end
+# Lines 807-945 are the broken forecasting JS outside script + old feed
 
-html = html.replace('Device Type ?', 'Device Type ✓')
-html = html.replace('Time of Day ?', 'Time of Day ✓')
-html = html.replace('Referral Source ?', 'Referral Source ✓')
-html = html.replace('Geo Region ? (disabled)', 'Geo Region ✗ (disabled)')
+head = lines[:805]  # index 0-804 = lines 1-805 (ends right before </script>)
 
-# Fix table columns with unknown '?' values (conversion checkmarks)
-html = html.replace('<td>?</td>', '<td>✓</td>')
-html = html.replace('<div class="muted">?</div>', '<div class="muted">✓</div>') # Just in case
+# Now build the forecasting lab JS (cleaned up, grocery-only)
+forecast_js = """
+/* =========== Forecasting Lab =========== */
+const flabTabs=[...document.querySelectorAll('.forecast-tab-btn')];
+const flabPanes=[...document.querySelectorAll('.forecast-tab-pane')];
+flabTabs.forEach(btn=>btn.addEventListener('click',()=>{
+  flabTabs.forEach(b=>b.classList.remove('active'));
+  flabPanes.forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  const pane=document.getElementById(`forecast-tab-${btn.dataset.forecastTab}`);
+  if(pane) pane.classList.add('active');
+}));
 
-# Fix the dummy danger text back to "Out of Stock"
-html = html.replace('<span class="pill bad">✗ Danger</span>', '<span class="pill bad">✗ Out of Stock</span>')
+const flabCollapseBtn=document.getElementById('flabCollapseBtn');
+const flabNoteBody=document.getElementById('flabNoteBody');
+if(flabCollapseBtn&&flabNoteBody){
+  flabCollapseBtn.addEventListener('click',()=>{
+    const hidden=flabNoteBody.style.display==='none';
+    flabNoteBody.style.display=hidden?'block':'none';
+    flabCollapseBtn.textContent=hidden?'\\u25be Collapse':'\\u25b8 Expand';
+  });
+}
 
-# Any "Warn Benchmark" fixing
-html = html.replace('<span class="pill warn">? Benchmark variant</span>', '<span class="pill warn">★ Benchmark variant</span>')
-html = html.replace('<span class="pill ok">? 95% confident', '<span class="pill ok">✓ 95% confident')
+const srcKaggle=document.getElementById('srcKaggle');
+const srcUpload=document.getElementById('srcUpload');
+const kaggleNote=document.getElementById('kaggleNote');
+const uploadZone=document.getElementById('uploadZone');
+function setSrc(mode){
+  const isK=mode==='kaggle';
+  srcKaggle.classList.toggle('active',isK);
+  srcUpload.classList.toggle('active',!isK);
+  kaggleNote.style.display=isK?'block':'none';
+  uploadZone.style.display=isK?'none':'block';
+}
+if(srcKaggle&&srcUpload){srcKaggle.addEventListener('click',()=>setSrc('kaggle'));srcUpload.addEventListener('click',()=>setSrc('upload'));}
 
-# The pill Active and increased states inside tables (double check)
-# It's currently: <span class="pill ok">▲ Increased</span> - that is correct.
+const trainBtn=document.getElementById('trainModelBtn');
+const trainProgress=document.getElementById('trainProgress');
+const trainLog=document.getElementById('trainLog');
+const trainBar=document.getElementById('trainBar');
+const modelResults=document.getElementById('modelResults');
+const forecastChart=document.getElementById('forecastChart');
+const forecastTable=document.getElementById('forecastTable');
+let trained=false;
+if(trainBtn){
+  trainBtn.addEventListener('click',()=>{
+    if(trained) return;
+    trained=true;
+    trainBtn.style.display='none';
+    trainProgress.classList.add('active');
+    trainLog.innerHTML='';
+    const lines= ['[00:00] Loading grocery sales data...','[00:01] Encoding categories and time features...','[00:03] Engineering features: lag_7, lag_14, lag_28...','[00:04] Splitting: 80% train (2013\\u20132016), 20% test (2017)...','[00:09] Evaluating on test set...','[00:10] \\u2705 Training complete!'];
+    let i=0;
+    trainBar.style.width='0%';
+    setTimeout(()=>{trainBar.style.width='100%';},80);
+    const iv=setInterval(()=>{
+      if(i<lines.length){
+        const d=document.createElement('div');d.className='feed-line';d.textContent=lines[i];trainLog.appendChild(d);trainLog.scrollTop=trainLog.scrollHeight;i++;
+      } else {
+        clearInterval(iv);
+        setTimeout(()=>{
+          trainProgress.classList.remove('active');
+          modelResults.classList.add('active');
+          forecastChart.style.display='block';
+          forecastTable.style.display='block';
+          showToast('Forecast model trained successfully','#66E3F2');
+        },800);
+      }
+    },1500);
+  });
+}
 
-with open("frontend/admin.html", "w", encoding="utf-8") as f:
-    f.write(html)
+/* Product search autocomplete */
+const productSearch=document.getElementById('productSearch');
+const productSuggestions=document.getElementById('productSuggestions');
+if(productSearch&&productSuggestions){
+  productSearch.addEventListener('focus',()=>productSuggestions.classList.add('active'));
+  productSearch.addEventListener('blur',()=>setTimeout(()=>productSuggestions.classList.remove('active'),120));
+  productSuggestions.querySelectorAll('.suggest-item').forEach(item=>{
+    item.addEventListener('click',()=>{productSearch.value=item.textContent;productSuggestions.classList.remove('active');});
+  });
+}
 
-print("Fixed UI errors.")
+/* Price prediction */
+const predictPriceBtn=document.getElementById('predictPriceBtn');
+const priceFormWrap=document.getElementById('priceFormWrap');
+const predictSpinner=document.getElementById('predictSpinner');
+const predictResult=document.getElementById('predictResult');
+const strategySelect=document.getElementById('strategySelect');
+const usedStrategy=document.getElementById('usedStrategy');
+if(predictPriceBtn){
+  predictPriceBtn.addEventListener('click',()=>{
+    priceFormWrap.style.display='none';
+    predictSpinner.classList.add('active');
+    setTimeout(()=>{
+      predictSpinner.classList.remove('active');
+      if(usedStrategy) usedStrategy.textContent=strategySelect.value;
+      predictResult.classList.add('active');
+    },1500);
+  });
+}
+const tryStrategyBtn=document.getElementById('tryStrategyBtn');
+if(tryStrategyBtn){tryStrategyBtn.addEventListener('click',()=>{predictResult.classList.remove('active');priceFormWrap.style.display='block';});}
+const applySingleBtn=document.getElementById('applySingleBtn');
+if(applySingleBtn){applySingleBtn.addEventListener('click',()=>showToast('Applied price update for Amul Full Cream Milk','#7CB99A'));}
+const applyAllBtn=document.getElementById('applyAllBtn');
+if(applyAllBtn){applyAllBtn.addEventListener('click',()=>showToast('Applied all recommended price changes','#7CB99A'));}
+
+"""
+
+# Build output
+output = []
+output.extend(head)
+output.append(forecast_js + "\n")
+output.append("</script>\n")
+output.append("</body>\n")
+output.append("</html>\n")
+
+with open(SRC, "w", encoding="utf-8") as f:
+    f.writelines(output)
+
+print(f"Fixed! New file has {sum(1 for line in open(SRC, 'r', encoding='utf-8'))} lines")
+print("- Forecasting Lab JS moved inside <script> tag")
+print("- Old Electronics/Sports feed removed (new grocery feed already in dynamic JS)")
+print("- Proper </script></body></html> closing")
