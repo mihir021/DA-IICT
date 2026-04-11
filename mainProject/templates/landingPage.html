@@ -106,9 +106,10 @@
 <span class="material-symbols-outlined text-emerald-700" data-icon="shopping_basket">shopping_basket</span>
 <span>BasketIQ</span>
 </div>
-<button class="bg-primary-container text-on-primary-container px-5 py-2 rounded-full font-semibold transition-transform scale-95 active:scale-90 font-plus-jakarta">
-                Start Shopping
-            </button>
+<a href="{% url 'login' %}" 
+   class="bg-primary-container text-on-primary-container px-5 py-2 rounded-full font-semibold">
+   Start Shopping
+</a>
 </nav>
 </header>
 <main class="pt-20 overflow-x-hidden">
@@ -128,7 +129,8 @@
                     BasketIQ predicts your grocery needs before you even run out. Freshness, curated just for you.
                 </p>
 <div class="flex flex-col sm:flex-row gap-4 mt-4">
-<button class="emerald-gradient text-white px-10 py-5 rounded-full font-bold text-lg editorial-shadow transition-transform hover:scale-105 active:scale-95">
+<button class="emerald-gradient text-white px-10 py-5 rounded-full font-bold text-lg editorial-shadow transition-transform hover:scale-105 active:scale-95" 
+data-bs-target="{%url 'login'%}">
                         Start Shopping
                     </button>
 <button class="flex items-center justify-center gap-2 text-primary font-bold px-10 py-5 hover:bg-emerald-50 rounded-full transition-colors">

@@ -11,3 +11,7 @@ def aiGroceryPlanner(request):
 
 def myOrder(request):
     return render(request, "myOrder.html")
+
+
+def login(request):
+    return render(request, "login.html")

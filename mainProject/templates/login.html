@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Login | BasketIQ</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#006036",
+                        background: "#f9f9f6",
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background font-['Plus_Jakarta_Sans']">
+    <header class="fixed top-0 w-full z-50 bg-white/85 backdrop-blur-xl shadow-sm">
+        <nav class="flex justify-between items-center max-w-7xl mx-auto px-6 h-20">
+            <div class="text-xl font-extrabold text-emerald-800 flex items-center gap-2">
+                <span class="material-symbols-outlined text-emerald-700">shopping_basket</span>
+                <span>BasketIQ</span>
+            </div>
+        </nav>
+    </header>
+
+    <main class="min-h-screen pt-32 pb-12 flex items-center justify-center px-6">
+        <div class="max-w-md w-full bg-white p-10 rounded-[2.5rem] shadow-xl border border-zinc-100">
+            <h2 class="text-3xl font-extrabold text-center mb-8">Welcome Back</h2>
+            
+            <form id="loginForm" class="space-y-4">
+                <input type="email" id="email" placeholder="Email Address" required class="w-full px-5 py-4 rounded-2xl bg-zinc-50 border-none focus:ring-2 focus:ring-primary">
+                <input type="password" id="password" placeholder="Password" required class="w-full px-5 py-4 rounded-2xl bg-zinc-50 border-none focus:ring-2 focus:ring-primary">
+                
+                <button type="submit" class="w-full bg-primary text-white py-5 rounded-full font-bold text-lg shadow-lg hover:scale-105 transition-all">
+                    Login Now
+                </button>
+            </form>
+            
+            <p class="text-center mt-6 text-sm text-zinc-500">
+                New to BasketIQ? <a href="signup.html" class="text-primary font-bold">Create Account</a>
+            </p>
+        </div>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
+            };
+            
+            console.log("🚀 Login button clicked...");
+            const result = await api.login(data);
+            
+            if (result.token) {
+                console.log("🏠 Login API success. Redirecting to Index...");
+                window.location.href = 'index.html';
+            } else {
+                console.error("❌ Login failed. Result:", result);
+                alert(result.error || 'Login failed! Check your email and password.');
+            }
+        });
+    </script>
+</body>
+</html>
