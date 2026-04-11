@@ -1,1 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Product Details | BasketIQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f9f9f6; }
+        .emerald-gradient { background: linear-gradient(135deg, #006036 0%, #1b7a4a 100%); }
+    </style>
+</head>
+<body class="min-h-screen">
+    <header class="max-w-7xl mx-auto px-6 h-20 flex items-center">
+        <a href="home.html" class="font-bold text-zinc-400 hover:text-emerald-700 transition-colors">← Back to Shopping</a>
+    </header>
 
+    <main class="max-w-7xl mx-auto px-6 py-12">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+            <!-- Product Image -->
+            <div class="bg-white p-12 rounded-[3.5rem] shadow-xl border border-zinc-50 flex items-center justify-center text-9xl aspect-square">
+                🎁
+            </div>
+
+            <!-- Details -->
+            <div class="flex flex-col gap-8">
+                <div>
+                    <span class="px-4 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full uppercase tracking-widest mb-4 inline-block">Best Seller</span>
+                    <h1 id="pName" class="text-5xl font-extrabold text-zinc-900 mb-4">Loading...</h1>
+                    <p id="pCategory" class="text-zinc-400 font-bold mb-6 italic">Category</p>
+                    <div class="flex items-baseline gap-4">
+                        <span id="pPrice" class="text-4xl font-extrabold text-emerald-700">₹0</span>
+                        <span class="text-zinc-300 line-through text-xl">₹0</span>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-zinc-100">
+                    <h3 class="font-bold mb-2">Product Information</h3>
+                    <p class="text-zinc-500 leading-relaxed text-sm">
+                        Sourced from the finest organic farms, our pulse and vegetable varieties are processed using traditional methods to preserve nutrition and flavor.
+                    </p>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="flex items-center gap-4 bg-zinc-100 px-6 py-4 rounded-full font-bold">
+                        <button class="text-2xl opacity-50 hover:opacity-100">-</button>
+                        <span>1</span>
+                        <button class="text-2xl opacity-50 hover:opacity-100">+</button>
+                    </div>
+                    <button class="flex-1 emerald-gradient text-white py-4 rounded-full font-bold text-lg shadow-xl shadow-emerald-900/10">Add to Cart</button>
+                </div>
+
+                <div class="flex items-center gap-4 text-sm font-bold text-zinc-400">
+                    <span class="flex items-center gap-1">🛡️ Protected Payment</span>
+                    <span class="flex items-center gap-1">✅ Quality Assured</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import api from './js/api.js';
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('id');
+
+        async function loadDetail() {
+            if (!productId) return;
+            try {
+                // For simplicity, we filter all products or fetch a specific one
+                const products = await api.getProducts();
+                const p = products.find(x => x._id === productId);
+                if (p) {
+                    document.getElementById('pName').innerText = p.name;
+                    document.getElementById('pPrice').innerText = `₹${p.price}`;
+                    document.getElementById('pCategory').innerText = p.category;
+                }
+            } catch (err) { console.error(err); }
+        }
+        loadDetail();
+    </script>
+</body>
+</html>
