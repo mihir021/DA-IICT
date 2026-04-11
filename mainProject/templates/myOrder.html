@@ -1,414 +1,132 @@
 <!DOCTYPE html>
-
-<html class="light" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "on-tertiary-fixed": "#410006",
-                        "on-secondary": "#ffffff",
-                        "on-primary-container": "#abffc6",
-                        "primary": "#006036",
-                        "surface-variant": "#e2e3e0",
-                        "surface-container-high": "#e8e8e5",
-                        "primary-container": "#1b7a4a",
-                        "on-tertiary-container": "#ffe8e6",
-                        "on-error": "#ffffff",
-                        "surface-container": "#eeeeeb",
-                        "inverse-surface": "#2f312f",
-                        "inverse-on-surface": "#f1f1ee",
-                        "surface-container-highest": "#e2e3e0",
-                        "tertiary-fixed": "#ffdad8",
-                        "tertiary-container": "#bf3c40",
-                        "inverse-primary": "#80d9a0",
-                        "on-tertiary-fixed-variant": "#8c1520",
-                        "surface-container-lowest": "#ffffff",
-                        "surface": "#f9f9f6",
-                        "background": "#f9f9f6",
-                        "secondary": "#835500",
-                        "on-surface-variant": "#3f4941",
-                        "tertiary": "#9d232a",
-                        "on-primary": "#ffffff",
-                        "primary-fixed-dim": "#80d9a0",
-                        "secondary-fixed-dim": "#ffb955",
-                        "secondary-fixed": "#ffddb4",
-                        "on-secondary-fixed": "#291800",
-                        "on-secondary-container": "#6b4500",
-                        "on-primary-fixed-variant": "#00522e",
-                        "surface-bright": "#f9f9f6",
-                        "on-error-container": "#93000a",
-                        "tertiary-fixed-dim": "#ffb3b0",
-                        "on-surface": "#1a1c1b",
-                        "primary-fixed": "#9cf6ba",
-                        "on-tertiary": "#ffffff",
-                        "surface-dim": "#dadad7",
-                        "on-background": "#1a1c1b",
-                        "secondary-container": "#feae2c",
-                        "on-secondary-fixed-variant": "#633f00",
-                        "surface-container-low": "#f4f4f1",
-                        "error-container": "#ffdad6",
-                        "error": "#ba1a1a",
-                        "surface-tint": "#006d3e",
-                        "outline": "#6f7a70",
-                        "outline-variant": "#bec9be",
-                        "on-primary-fixed": "#00210f"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "2xl": "1rem",
-                        "3xl": "1.5rem",
-                        "full": "9999px"
-                    },
-                    "fontFamily": {
-                        "headline": ["Plus Jakarta Sans"],
-                        "body": ["Plus Jakarta Sans"],
-                        "label": ["Plus Jakarta Sans"]
-                    }
-                },
-            },
-        }
-    </script>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-            vertical-align: middle;
-        }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>My Orders | BasketIQ</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>tailwind.config={theme:{extend:{colors:{primary:"#006036","primary-container":"#1b7a4a",background:"#f9f9f6"}}}}</script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f9f9f6; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        @keyframes sk { 0%{background-color:#e5e7eb} 50%{background-color:#f3f4f6} 100%{background-color:#e5e7eb} }
+        .skeleton { animation: sk 1.5s infinite ease-in-out; border-radius: 0.75rem; }
     </style>
 </head>
-<body class="bg-background text-on-background min-h-screen">
-<!-- Top Navigation Bar -->
-<header class="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-outline-variant/30 shadow-sm">
-<div class="max-w-[1200px] mx-auto px-6 h-20 flex items-center justify-between">
-<div class="flex items-center gap-12">
-<h1 class="text-2xl font-bold bg-gradient-to-br from-emerald-900 to-emerald-600 bg-clip-text text-transparent font-headline tracking-tight whitespace-nowrap">Harvest Intelligence</h1>
-<nav class="hidden md:flex items-center gap-6">
-<a class="flex items-center gap-2 px-3 py-2 text-on-surface-variant hover:text-primary font-semibold text-sm transition-colors" href="#">
-<span class="material-symbols-outlined text-xl">storefront</span>
-                        Market
-                    </a>
-<a class="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full font-bold text-sm transition-all" href="#">
-<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
-                        My Orders
-                    </a>
-<a class="flex items-center gap-2 px-3 py-2 text-on-surface-variant hover:text-primary font-semibold text-sm transition-colors" href="#">
-<span class="material-symbols-outlined text-xl">menu_book</span>
-                        Recipes
-                    </a>
-<a class="flex items-center gap-2 px-3 py-2 text-on-surface-variant hover:text-primary font-semibold text-sm transition-colors" href="#">
-<span class="material-symbols-outlined text-xl">shopping_basket</span>
-                        Basket
-                    </a>
-</nav>
-</div>
-<div class="flex items-center gap-4">
-<button class="material-symbols-outlined p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors">search</button>
-<div class="flex items-center gap-3 bg-surface-container-low pl-1 pr-3 py-1 rounded-full border border-outline-variant/20 cursor-pointer hover:bg-surface-container transition-colors">
-<div class="w-8 h-8 rounded-full overflow-hidden border border-primary-fixed">
-<img class="w-full h-full object-cover" data-alt="close-up portrait of a smiling young man" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3DNzEJc9wBGR78avmbuQ5QbKnoHIRQ1CY83nDQlIUOXSMVlIXCb1JUDljDuw7E4j2_v00Q1Ow1cOC6AwozNEzKQtW__MtvJHZYROA8UXejoxK4zS462GyovBiqPnBod98GyPNOM-KLhLhAMxm_wuW0VdcLMjWB9L8KpLaNqwBozefisGqyxToEJbIHmeO0cZeTD3fGt2-LzU4vqaOcS7xFXS31zQXlJeO-BHwGdz6jKrMcdGuMrbRPGPdHGcfO8ZSIi0dlNhptjbi"/>
-</div>
-<span class="text-sm font-bold">Alex Morgan</span>
-</div>
-</div>
-</div>
-</header>
-<!-- Main Content Area -->
-<main class="max-w-[1200px] mx-auto px-6 py-10 space-y-12">
-<!-- Hero: Impact Banner (Full Width) -->
-<section class="relative overflow-hidden bg-gradient-to-br from-primary to-primary-container rounded-[2.5rem] p-10 lg:p-14 shadow-2xl flex flex-col lg:flex-row items-center justify-between gap-12">
-<div class="relative z-10 space-y-8 flex-1">
-<div class="space-y-4">
-<div class="flex items-center gap-2 text-primary-fixed">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">eco</span>
-<span class="text-xs font-bold uppercase tracking-widest font-label">Your Impact Journal</span>
-</div>
-<h2 class="text-white text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight">Growing together, <br/>one harvest at a time.</h2>
-</div>
-<div class="grid grid-cols-2 sm:grid-cols-4 gap-6 w-full">
-<div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 flex flex-col gap-1 hover:bg-white/15 transition-colors">
-<span class="text-on-primary-container text-[11px] uppercase font-bold tracking-widest">Orders</span>
-<div class="flex items-center gap-3 mt-1">
-<span class="material-symbols-outlined text-primary-fixed text-2xl">shopping_bag</span>
-<span class="text-white font-bold text-2xl">47</span>
-</div>
-</div>
-<div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 flex flex-col gap-1 hover:bg-white/15 transition-colors">
-<span class="text-on-primary-container text-[11px] uppercase font-bold tracking-widest">Total Saved</span>
-<div class="flex items-center gap-3 mt-1">
-<span class="material-symbols-outlined text-secondary-fixed text-2xl">savings</span>
-<span class="text-white font-bold text-2xl">₹1,240</span>
-</div>
-</div>
-<div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 flex flex-col gap-1 hover:bg-white/15 transition-colors">
-<span class="text-on-primary-container text-[11px] uppercase font-bold tracking-widest">Fresh Items</span>
-<div class="flex items-center gap-3 mt-1">
-<span class="material-symbols-outlined text-primary-fixed text-2xl">inventory_2</span>
-<span class="text-white font-bold text-2xl">312</span>
-</div>
-</div>
-<div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 flex flex-col gap-1 hover:bg-white/15 transition-colors">
-<span class="text-on-primary-container text-[11px] uppercase font-bold tracking-widest">AI Insights</span>
-<div class="flex items-center gap-3 mt-1">
-<span class="material-symbols-outlined text-secondary-fixed text-2xl">auto_awesome</span>
-<span class="text-white font-bold text-2xl">23</span>
-</div>
-</div>
-</div>
-</div>
-<div class="relative w-full lg:w-1/3 max-w-[340px]">
-<div class="absolute inset-0 bg-white/20 blur-[100px] rounded-full"></div>
-<img class="w-full h-auto object-contain relative z-10 drop-shadow-2xl" data-alt="3D wicker basket" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAPOP2uuHxQ4Fik3XivjbduH-jQoJDX_D_IFayBrAGfAzgDwFxL0MxTzQgcIA30lJ9J3zVEv3OPIt1mORR1Qx6Mk7O8CSbajR5ZfXMs4zXdL34KOi7vbGpm3y-KSOKZ8Lv_H4Syhg2Wc5ygR47qb3dx9hYVoyC94i-xx7KUyASqDMtmuM3qsVsLe6IzTeq0LbTytrvWrjPqfHR5r7j2sTUJGysLU91TB7iWxi0T0hyJPrCjgarz5O9n5p0Icv73IZq7xUO3tnma022"/>
-</div>
-</section>
-<!-- Live Order Tracking (Expanded Full Width) -->
-<section class="space-y-6">
-<h3 class="text-2xl font-extrabold flex items-center gap-3">
-<span class="w-3 h-3 rounded-full bg-secondary animate-pulse"></span>
-                Active Tracking
-            </h3>
-<div class="bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-outline-variant/30 grid grid-cols-1 lg:grid-cols-12 min-h-[480px]">
-<div class="lg:col-span-7 p-10 lg:p-14 space-y-10 flex flex-col justify-center">
-<div class="flex flex-col sm:flex-row justify-between items-start gap-6">
-<div class="space-y-2">
-<p class="text-[11px] text-secondary font-bold uppercase tracking-widest">Estimated Arrival</p>
-<h4 class="text-4xl font-extrabold">12:15 PM <span class="text-primary text-xl ml-2 font-bold">(12 mins)</span></h4>
-<p class="text-on-surface-variant font-medium">Order #BK-9204 • From Harvest Central</p>
-</div>
-<span class="px-6 py-2 bg-secondary-container text-on-secondary-container text-xs font-bold rounded-full uppercase tracking-tighter shadow-sm border border-secondary/10">Out for Delivery</span>
-</div>
-<!-- Detailed Horizontal Progress Tracker -->
-<div class="relative py-8">
-<div class="absolute top-[4.25rem] left-8 right-8 h-1 bg-surface-container rounded-full"></div>
-<div class="absolute top-[4.25rem] left-8 w-[72%] h-1 bg-primary rounded-full transition-all duration-1000"></div>
-<div class="flex justify-between items-start relative z-10">
-<div class="flex flex-col items-center gap-4 text-center">
-<div class="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20 ring-4 ring-white">
-<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">check</span>
-</div>
-<div class="space-y-1">
-<span class="text-sm font-bold block">Order Placed</span>
-<span class="text-[10px] text-outline font-medium">09:42 AM</span>
-</div>
-</div>
-<div class="flex flex-col items-center gap-4 text-center">
-<div class="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20 ring-4 ring-white">
-<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">check</span>
-</div>
-<div class="space-y-1">
-<span class="text-sm font-bold block">Packed</span>
-<span class="text-[10px] text-outline font-medium">10:15 AM</span>
-</div>
-</div>
-<div class="flex flex-col items-center gap-4 text-center">
-<div class="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center shadow-2xl shadow-primary/40 ring-4 ring-white relative -mt-2">
-<span class="material-symbols-outlined text-2xl">delivery_dining</span>
-</div>
-<div class="space-y-1">
-<span class="text-sm font-bold text-primary block">In Transit</span>
-<span class="text-[10px] text-primary font-bold">Current Step</span>
-</div>
-</div>
-<div class="flex flex-col items-center gap-4 text-center">
-<div class="w-12 h-12 rounded-full bg-surface-container text-outline flex items-center justify-center ring-4 ring-white">
-<span class="material-symbols-outlined text-xl">home</span>
-</div>
-<div class="space-y-1">
-<span class="text-sm font-bold text-outline block">Delivered</span>
-<span class="text-[10px] text-outline font-medium">Expected 12:15</span>
-</div>
-</div>
-</div>
-</div>
-<div class="flex flex-wrap gap-4 pt-4">
-<button class="px-8 py-4 bg-primary text-white font-bold rounded-2xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center gap-2">
-<span class="material-symbols-outlined">description</span>
-                            View Order Details
-                        </button>
-<button class="px-8 py-4 bg-surface-container-low text-on-surface-variant font-bold rounded-2xl hover:bg-surface-container transition-colors flex items-center gap-2">
-<span class="material-symbols-outlined">support_agent</span>
-                            Help Center
-                        </button>
-</div>
-</div>
-<!-- Large Map Area -->
-<div class="lg:col-span-5 h-[300px] lg:h-auto relative">
-<img class="w-full h-full object-cover grayscale-[0.2] contrast-[1.1]" data-alt="delivery map" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCF3L833XG5g21Y7TzQXDeFHECcR1n7tD9Zot9qtE-gaUKB52Fr5Yhkcj9v-IbBuUzkyPN09bgTwRT5rQJLhryfD-D4aUGg1Ypib3wJlkrIKTEhB2b1wfcp2KhQshJpKQ5FHHBnKgm-nf0BgfoqpocJguUwloYfYqpxP9pX23Ss1UKiYKpE2dHNNN9tiMO8W1UKbOBpzAoMbTuJClpDrZB3xuuK1Z6gRNENJDF8qhJL54icQKqYcmfhOdi-_3S8kQet7hlt70XM5fx3"/>
-<div class="absolute inset-0 bg-primary/5"></div>
-<!-- Delivery Driver Marker -->
-<div class="absolute top-[45%] left-[60%] flex flex-col items-center">
-<div class="p-3 bg-white rounded-2xl shadow-2xl animate-bounce border-2 border-primary">
-<span class="material-symbols-outlined text-primary text-3xl">delivery_dining</span>
-</div>
-<div class="mt-2 px-3 py-1 bg-white/90 backdrop-blur-md rounded-lg shadow-lg text-[10px] font-bold border border-outline-variant/20">Raj is 1.2km away</div>
-</div>
-<!-- Destination Marker -->
-<div class="absolute top-[30%] left-[20%]">
-<div class="w-6 h-6 bg-secondary rounded-full border-4 border-white shadow-xl animate-pulse"></div>
-</div>
-</div>
-</div>
-</section>
-<!-- Past Orders (Single Column Expanded) -->
-<section class="space-y-8">
-<div class="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-outline-variant/20 pb-6">
-<h3 class="text-2xl font-extrabold">Past Orders</h3>
-<div class="flex flex-wrap gap-3">
-<button class="px-6 py-2.5 rounded-full bg-primary text-white text-xs font-bold shadow-md shadow-primary/20">All time</button>
-<button class="px-6 py-2.5 rounded-full bg-white text-on-surface-variant text-xs font-semibold hover:bg-surface-container-low transition-colors border border-outline-variant/30">Delivered</button>
-<button class="px-6 py-2.5 rounded-full bg-white text-on-surface-variant text-xs font-semibold hover:bg-surface-container-low transition-colors border border-outline-variant/30">AI Planned</button>
-<div class="relative min-w-[240px]">
-<span class="absolute inset-y-0 left-4 flex items-center pointer-events-none material-symbols-outlined text-outline text-lg">search</span>
-<input class="w-full pl-11 pr-4 py-2.5 bg-white rounded-full border border-outline-variant/30 focus:ring-2 focus:ring-primary/20 text-sm" placeholder="Search orders..." type="text"/>
-</div>
-</div>
-</div>
-<div class="space-y-6">
-<!-- AI Planned Order Card (Wide) -->
-<div class="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-outline-variant/30 group hover:shadow-xl transition-all duration-300">
-<div class="bg-emerald-50 px-8 py-3 flex items-center justify-between border-b border-emerald-100">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
-<span class="text-[10px] text-primary font-bold uppercase tracking-widest">AI Optimizer Plan • Balanced Nutrition</span>
-</div>
-<span class="text-[10px] text-primary/60 font-medium">Saved ₹124 on this plan</span>
-</div>
-<div class="p-8 flex flex-col md:flex-row items-center gap-8">
-<div class="flex-1 space-y-4 w-full">
-<div class="flex justify-between items-start">
-<div>
-<h3 class="text-xl font-extrabold">Order #BK-8841</h3>
-<p class="text-sm text-on-surface-variant font-medium">Delivered • May 14, 2024</p>
-</div>
-<span class="px-4 py-1.5 bg-primary/10 text-primary text-[11px] font-bold rounded-full uppercase border border-primary/20">Completed</span>
-</div>
-<div class="flex flex-wrap gap-4">
-<div class="flex items-center gap-3 bg-surface-container-low p-2 pr-4 rounded-2xl border border-outline-variant/10">
-<div class="w-12 h-12 rounded-xl overflow-hidden bg-white shadow-sm">
-<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYMP4iq_aMg572xPKEdCOdioR9nmq0moPNDsG50I6IE-9bZT6-zvtljPdMsncR5LITfneCPxW7OskIgrWTLB1onM5X8u3UCKB-OV7NkXAaBwbZbcO6u_OOd2FqVp2GRYf9eXoqjHYeAEijs79MtQNpqIhDxIDuyHTzO822dSKrMNT6hgqsFSk5Kc3zMfr5vAfx31TTe-rkfif5vtQsdo1MC9T-uJ4agwxzmZLNL1Z0O6Cboqf9Vxmc3eVYB_BkZ_0b0XfWkbWZKmd7"/>
-</div>
-<div>
-<p class="text-xs font-bold">Organic Tomatoes</p>
-<p class="text-[10px] text-outline">500g • ₹85</p>
-</div>
-</div>
-<div class="flex items-center gap-3 bg-surface-container-low p-2 pr-4 rounded-2xl border border-outline-variant/10">
-<div class="w-12 h-12 rounded-xl overflow-hidden bg-white shadow-sm">
-<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDc2DWPWKR7vPNHs-6m7UurE5D7NoKsMTzON_GJnfndorDgG59AEBl7DPT2qk2ovRaAH1FwFZUcItsT_j8KkNtIDDMz4cTyBvaF9l41cQeNMsFL24Zp1_iykJirdcrJQN6qBaVrgtU64iJvEfIs_weVghIHY50YVrjIlqI_IeBcu1zTXzq8Ls_eklN6MD8fVzbnr-LoWUYc7sUHlqrySHyi-5ZT50WSiSH5Xcj02GpP8-FcmzgizBOFrP4Me6e5GxNskN95qahzDleo"/>
-</div>
-<div>
-<p class="text-xs font-bold">Fuji Apples</p>
-<p class="text-[10px] text-outline">1kg • ₹180</p>
-</div>
-</div>
-<div class="w-12 h-12 rounded-xl bg-surface-container-highest flex items-center justify-center text-xs font-bold text-on-surface-variant border border-outline-variant/20">
-                                    +10
-                                </div>
-</div>
-</div>
-<div class="w-full md:w-px h-px md:h-24 bg-outline-variant/20"></div>
-<div class="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-4 w-full md:w-48">
-<div class="text-left md:text-right">
-<span class="text-on-surface font-extrabold text-3xl tracking-tight">₹842</span>
-<p class="text-[11px] text-outline font-medium">12 Items • Eco-Packed</p>
-</div>
-<button class="flex items-center gap-2 px-8 py-3 bg-secondary-container text-on-secondary-container rounded-2xl text-sm font-bold hover:shadow-lg transition-all active:scale-95">
-<span class="material-symbols-outlined text-lg">refresh</span>
-                                Reorder
-                            </button>
-</div>
-</div>
-</div>
-<!-- Standard Order Card (Wide) -->
-<div class="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-outline-variant/30 group hover:shadow-xl transition-all duration-300">
-<div class="p-8 flex flex-col md:flex-row items-center gap-8">
-<div class="flex-1 space-y-4 w-full">
-<div class="flex justify-between items-start">
-<div>
-<h3 class="text-xl font-extrabold">Order #BK-8722</h3>
-<p class="text-sm text-on-surface-variant font-medium">Delivered • May 10, 2024</p>
-</div>
-<span class="px-4 py-1.5 bg-surface-container text-on-surface-variant text-[11px] font-bold rounded-full uppercase">Delivered</span>
-</div>
-<div class="flex flex-wrap gap-4">
-<div class="w-16 h-16 rounded-2xl bg-surface-container-low border border-outline-variant/10 overflow-hidden shadow-sm">
-<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpGAyT_HHdyHcRrUIeppuBLGRiS1GcZF0kvpyD9rDL4yMmTDp6kM5YKNRFS_8HhJ0A2vwStZjsy_exRPhYMC5TRtZ-Tj9VPaIna0EMQ6K6HMfo-UerSYgBJXy5Hf_bhCJF0_57Y8-_PI-0au0v68r0xbst6-yHvHcL2gL4UoeCJwmoMX73RTX_SlW65txoFYOmtvuN24zQFppNO4gvUbLOhV6yOx4Eg_14rAMqCHnhz2ImiXZIOBC9g7eWG0fhbZ39HQgFPTl77c9r"/>
-</div>
-<div class="w-16 h-16 rounded-2xl bg-surface-container-low border border-outline-variant/10 overflow-hidden shadow-sm">
-<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDulf-vbwLE8oMTK5WxEZi9pWh0AWwrAXsLVw8zEjyyMdxNkvoU4fNDYdcopLP8qHeR6iWUwmZdQumgjXlPAz8OVLEB53DC2i3BIKvhToRVvZJaqrSg2jJmfoUmk4EnlGBcWSNw1qne_2PPeV6PEk8c3NQEe2FzpKdGq5nc0XcD9HmRFy0FzquMUqXUno0KRbDsFsrJwsTSBrydnE2tsIEZlN0z7-mRd6x2o5ehHYLfRi10H7rSo15O8Fg8t2do3gppSuwlM1B8m9eT"/>
-</div>
-</div>
-</div>
-<div class="w-full md:w-px h-px md:h-24 bg-outline-variant/20"></div>
-<div class="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-4 w-full md:w-48">
-<div class="text-left md:text-right">
-<span class="text-on-surface font-extrabold text-3xl tracking-tight">₹247</span>
-<p class="text-[11px] text-outline font-medium">4 Items</p>
-</div>
-<button class="flex items-center gap-2 px-8 py-3 bg-surface-container-high text-on-surface font-bold rounded-2xl text-sm hover:bg-surface-container-highest transition-all active:scale-95">
-<span class="material-symbols-outlined text-lg">refresh</span>
-                                Reorder
-                            </button>
-</div>
-</div>
-</div>
-<!-- Cancelled Order (Wide) -->
-<div class="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-outline-variant/30 opacity-70 group hover:opacity-100 transition-opacity">
-<div class="p-8 flex flex-col md:flex-row items-center gap-8">
-<div class="flex-1 space-y-2 w-full">
-<div class="flex justify-between items-start">
-<div>
-<h3 class="text-xl font-extrabold">Order #BK-8610</h3>
-<p class="text-sm text-on-surface-variant font-medium">May 05, 2024</p>
-</div>
-<span class="px-4 py-1.5 bg-tertiary-container text-on-tertiary-container text-[11px] font-bold rounded-full uppercase">Cancelled</span>
-</div>
-<p class="text-sm text-tertiary font-medium">Payment failed • Refund processed to original source</p>
-</div>
-<div class="w-full md:w-px h-px md:h-24 bg-outline-variant/20"></div>
-<div class="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-4 w-full md:w-48">
-<div class="text-left md:text-right">
-<span class="text-on-surface font-extrabold text-3xl tracking-tight">₹1,120</span>
-<p class="text-[11px] text-outline font-medium">18 Items</p>
-</div>
-<button class="text-primary text-sm font-bold hover:underline underline-offset-4">View Refund Receipt</button>
-</div>
-</div>
-</div>
-</div>
-</section>
+<body class="bg-background pt-24 pb-28">
+
+<script>
+    const token = localStorage.getItem("token");
+    if (!token) { window.location.href = "/login/"; }
+</script>
+
+{% include '_navbar.html' %}
+
+<main class="max-w-4xl mx-auto px-6">
+    <div class="mb-10">
+        <h1 class="text-3xl font-extrabold text-zinc-900">My Orders</h1>
+        <p class="text-zinc-500 text-sm mt-1" id="ordersSubtitle">Loading your order history...</p>
+    </div>
+
+    <!-- Skeleton Loader -->
+    <div id="ordersSkeleton" class="space-y-6">
+        <div class="skeleton h-40 w-full"></div>
+        <div class="skeleton h-40 w-full"></div>
+        <div class="skeleton h-40 w-full"></div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden text-center py-20">
+        <span class="material-symbols-outlined text-6xl text-zinc-300 mb-4" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+        <h2 class="text-2xl font-extrabold text-zinc-400 mb-2">No orders yet</h2>
+        <p class="text-zinc-400 mb-8">Your order history will appear here once you place your first order.</p>
+        <a href="/aiGroceryPlanner/" class="px-8 py-4 bg-primary text-white font-bold rounded-2xl hover:bg-emerald-800 transition-colors shadow-lg">Plan Your Groceries</a>
+    </div>
+
+    <!-- Orders List -->
+    <div id="ordersList" class="hidden space-y-6"></div>
 </main>
-<!-- Footer for large width -->
-<footer class="max-w-[1200px] mx-auto px-6 py-12 border-t border-outline-variant/20 text-center">
-<p class="text-outline text-xs font-medium">© 2024 Harvest Intelligence • Freshness Delivered Sustainably</p>
-</footer>
-<!-- Mobile Bottom Nav (Visible only on small screens) -->
-<nav class="lg:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-white/90 backdrop-blur-xl rounded-t-3xl shadow-[0px_-10px_40px_rgba(0,0,0,0.05)] border-t border-outline-variant/20">
-<a class="flex flex-col items-center justify-center text-on-surface-variant/60 px-5 py-2" href="#">
-<span class="material-symbols-outlined text-2xl">storefront</span>
-<span class="text-[10px] font-bold uppercase mt-1">Market</span>
-</a>
-<a class="flex flex-col items-center justify-center bg-primary/10 text-primary rounded-2xl px-5 py-2" href="#">
-<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
-<span class="text-[10px] font-bold uppercase mt-1">Orders</span>
-</a>
-<a class="flex flex-col items-center justify-center text-on-surface-variant/60 px-5 py-2" href="#">
-<span class="material-symbols-outlined text-2xl">menu_book</span>
-<span class="text-[10px] font-bold uppercase mt-1">Recipes</span>
-</a>
-<a class="flex flex-col items-center justify-center text-on-surface-variant/60 px-5 py-2" href="#">
-<span class="material-symbols-outlined text-2xl">shopping_basket</span>
-<span class="text-[10px] font-bold uppercase mt-1">Basket</span>
-</a>
-</nav>
-</body></html>
+
+<script>
+async function loadOrders() {
+    try {
+        const res = await fetch('/api/orders/orders/', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const orders = await res.json();
+
+        document.getElementById('ordersSkeleton').classList.add('hidden');
+
+        if (!orders || orders.length === 0 || orders.error) {
+            document.getElementById('emptyState').classList.remove('hidden');
+            document.getElementById('ordersSubtitle').textContent = 'No orders found';
+            return;
+        }
+
+        document.getElementById('ordersSubtitle').textContent = `${orders.length} order${orders.length > 1 ? 's' : ''} placed`;
+        document.getElementById('ordersList').classList.remove('hidden');
+
+        const container = document.getElementById('ordersList');
+        container.innerHTML = orders.map(order => {
+            const date = order.date ? new Date(order.date).toLocaleDateString('en-IN', {
+                year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            }) : 'Unknown date';
+
+            const statusColors = {
+                'Confirmed': 'bg-emerald-100 text-emerald-700',
+                'Delivered': 'bg-blue-100 text-blue-700',
+                'Cancelled': 'bg-red-100 text-red-700',
+                'In Transit': 'bg-amber-100 text-amber-700',
+            };
+            const statusClass = statusColors[order.status] || 'bg-zinc-100 text-zinc-600';
+
+            const itemsHtml = (order.items || []).map(item => {
+                const imgSrc = item.image_url || 'https://cdn-icons-png.flaticon.com/512/3081/3081951.png';
+                return `
+                    <div class="flex items-center gap-3 py-2">
+                        <div class="w-10 h-10 rounded-lg bg-zinc-50 flex items-center justify-center shrink-0 p-1">
+                            <img src="${imgSrc}" class="w-6 h-6 object-contain"/>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold text-zinc-800 truncate">${item.name}</p>
+                            <p class="text-xs text-zinc-400">Qty: ${item.quantity} × ₹${item.price}</p>
+                        </div>
+                        <p class="text-sm font-bold text-zinc-700 shrink-0">₹${item.line_total || (item.quantity * item.price)}</p>
+                    </div>`;
+            }).join('');
+
+            return `
+                <div class="bg-white rounded-[2rem] shadow-sm border border-zinc-50 overflow-hidden hover:shadow-md transition-all">
+                    <div class="px-6 py-5 flex justify-between items-center border-b border-zinc-50">
+                        <div>
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-primary">package_2</span>
+                                <h3 class="font-extrabold text-zinc-900">${order.order_id}</h3>
+                                <span class="px-3 py-1 ${statusClass} text-[10px] font-bold rounded-full uppercase tracking-wide">${order.status}</span>
+                            </div>
+                            <p class="text-xs text-zinc-400 mt-1 ml-9">${date}</p>
+                        </div>
+                        <p class="text-xl font-extrabold text-primary">₹${order.total_amount}</p>
+                    </div>
+                    <div class="px-6 py-4 divide-y divide-zinc-50">${itemsHtml}</div>
+                    <div class="px-6 py-4 bg-zinc-50/50 flex justify-between items-center text-sm">
+                        <span class="text-zinc-500">${(order.items || []).length} item${(order.items || []).length > 1 ? 's' : ''}</span>
+                        <span class="font-bold text-zinc-700">Total: ₹${order.total_amount}</span>
+                    </div>
+                </div>`;
+        }).join('');
+
+    } catch (err) {
+        document.getElementById('ordersSkeleton').classList.add('hidden');
+        document.getElementById('emptyState').classList.remove('hidden');
+        document.getElementById('ordersSubtitle').textContent = 'Could not load orders';
+        console.error(err);
+    }
+}
+
+loadOrders();
+</script>
+</body>
+</html>

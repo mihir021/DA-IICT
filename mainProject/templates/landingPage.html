@@ -1,4 +1,4 @@
-%load static%
+{% load static %}
 <!DOCTYPE html>
 
 <html class="scroll-smooth" lang="en"><head>
@@ -99,19 +99,9 @@
     </style>
 </head>
 <body class="bg-background text-on-background font-body">
-<!-- TopAppBar -->
-<header class="fixed top-0 w-full z-50 bg-white/85 dark:bg-zinc-900/85 backdrop-blur-xl shadow-sm dark:shadow-none">
-<nav class="flex justify-between items-center max-w-7xl mx-auto px-6 h-20">
-<div class="text-xl font-extrabold text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
-<span class="material-symbols-outlined text-emerald-700" data-icon="shopping_basket">shopping_basket</span>
-<span>BasketIQ</span>
-</div>
-<a href="{% url 'login' %}" 
-   class="bg-primary-container text-on-primary-container px-5 py-2 rounded-full font-semibold">
-   Start Shopping
-</a>
-</nav>
-</header>
+
+{% include '_navbar.html' %}
+
 <main class="pt-20 overflow-x-hidden">
 <!-- Hero Section -->
 <section class="min-h-[900px] flex flex-col lg:flex-row px-6 py-12 lg:py-24 relative overflow-hidden max-w-7xl mx-auto gap-12">

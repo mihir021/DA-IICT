@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html class="light" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -7,387 +6,348 @@
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "on-tertiary-fixed": "#410006",
-                        "inverse-surface": "#2f312f",
-                        "inverse-primary": "#80d9a0",
-                        "surface-tint": "#006d3e",
-                        "primary-container": "#1b7a4a",
-                        "on-secondary-container": "#6b4500",
-                        "on-primary-container": "#abffc6",
-                        "outline-variant": "#bec9be",
-                        "outline": "#6f7a70",
-                        "primary-fixed": "#9cf6ba",
-                        "on-secondary": "#ffffff",
-                        "primary": "#006036",
-                        "surface-container-low": "#f4f4f1",
-                        "on-secondary-fixed-variant": "#633f00",
-                        "surface-variant": "#e2e3e0",
-                        "inverse-on-surface": "#f1f1ee",
-                        "on-error-container": "#93000a",
-                        "error-container": "#ffdad6",
-                        "secondary": "#835500",
-                        "on-tertiary-fixed-variant": "#8c1520",
-                        "on-background": "#1a1c1b",
-                        "on-secondary-fixed": "#291800",
-                        "tertiary": "#9d232a",
-                        "secondary-fixed": "#ffddb4",
-                        "secondary-container": "#feae2c",
-                        "background": "#f9f9f6",
-                        "secondary-fixed-dim": "#ffb955",
-                        "on-error": "#ffffff",
-                        "tertiary-container": "#bf3c40",
-                        "surface-container-highest": "#e2e3e0",
-                        "surface": "#f9f9f6",
-                        "primary-fixed-dim": "#80d9a0",
-                        "on-tertiary": "#ffffff",
-                        "tertiary-fixed-dim": "#ffb3b0",
-                        "surface-container-high": "#e8e8e5",
-                        "on-surface": "#1a1c1b",
-                        "surface-container": "#eeeeeb",
-                        "surface-dim": "#dadad7",
-                        "surface-bright": "#f9f9f6",
-                        "on-surface-variant": "#3f4941",
-                        "tertiary-fixed": "#ffdad8",
-                        "on-tertiary-container": "#ffe8e6",
-                        "on-primary-fixed-variant": "#00522e",
-                        "on-primary": "#ffffff",
-                        "surface-container-lowest": "#ffffff",
-                        "on-primary-fixed": "#00210f",
-                        "error": "#ba1a1a"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "2xl": "1rem",
-                        "3xl": "1.5rem",
-                        "full": "9999px"
-                    },
-                    "fontFamily": {
-                        "headline": ["Plus Jakarta Sans"],
-                        "body": ["Plus Jakarta Sans"],
-                        "label": ["Plus Jakarta Sans"]
-                    }
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    primary: "#006036",
+                    "primary-container": "#1b7a4a",
+                    "on-primary-container": "#abffc6",
+                    "on-secondary-container": "#6b4500",
+                    "secondary-container": "#feae2c",
+                    "outline-variant": "#bec9be",
+                    "surface-container-low": "#f4f4f1",
+                    "surface-container": "#eeeeeb",
+                    "surface-container-highest": "#e2e3e0",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-variant": "#e2e3e0",
+                    "on-surface": "#1a1c1b",
+                    "on-surface-variant": "#3f4941",
+                    background: "#f9f9f6",
+                    "on-background": "#1a1c1b",
+                    outline: "#6f7a70"
                 },
+                fontFamily: { headline: ["Plus Jakarta Sans"], body: ["Plus Jakarta Sans"] }
             },
-        }
-    </script>
-<style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f9f9f6; }
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-        .glass-panel { backdrop-filter: blur(24px); }
-        .premium-gradient { background: linear-gradient(135deg, #006036 0%, #1b7a4a 100%); }
-    </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
+        },
     }
-  </style>
-  </head>
-<body class="text-on-background min-h-screen pb-32">
-<!-- TopAppBar -->
-<header class="fixed top-0 w-full z-50 bg-emerald-50/85 dark:bg-zinc-900/85 backdrop-blur-xl shadow-[0px_4px_20px_rgba(26,28,27,0.04)]">
-<div class="flex justify-between items-center px-6 h-20 w-full max-w-screen-2xl mx-auto">
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-emerald-900 dark:text-emerald-50 cursor-pointer p-2 hover:bg-white/50 dark:hover:bg-zinc-800/50 transition-colors rounded-full" data-icon="menu">menu</span>
-<h1 class="text-xl font-bold text-emerald-900 dark:text-emerald-100 tracking-tight">Grocery Planner</h1>
-</div>
-<div class="flex items-center gap-6">
-<nav class="hidden md:flex gap-8">
-<a class="text-zinc-500 dark:text-zinc-400 font-medium hover:text-emerald-700 transition-colors" href="#">Market</a>
-<a class="text-emerald-700 dark:text-emerald-400 font-bold" href="#">Planner</a>
-<a class="text-zinc-500 dark:text-zinc-400 font-medium hover:text-emerald-700 transition-colors" href="#">Recipes</a>
-</nav>
-<div class="relative">
-<span class="material-symbols-outlined text-emerald-900 dark:text-emerald-50 cursor-pointer p-2 hover:bg-white/50 dark:hover:bg-zinc-800/50 transition-colors rounded-full" data-icon="shopping_cart">shopping_cart</span>
-<span class="absolute top-1 right-1 bg-secondary-container text-on-secondary-container text-[10px] font-bold px-1.5 py-0.5 rounded-full">3</span>
-</div>
-</div>
-</div>
-</header>
-<main class="pt-24 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+</script>
+<style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f9f9f6; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .premium-gradient { background: linear-gradient(135deg, #006036 0%, #1b7a4a 100%); }
+    @keyframes progress-indeterminate {
+        0%   { width: 0%;   left: 0; }
+        50%  { width: 60%;  left: 20%; }
+        100% { width: 0%;   left: 100%; }
+    }
+    .animate-progress-bar { animation: progress-indeterminate 2s ease-in-out infinite; }
+    @keyframes slideDown { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:translateY(0)} }
+    .animate-slide-down { animation: slideDown 0.5s ease-out; }
+</style>
+</head>
+<body class="text-on-background min-h-screen pb-32 pt-24">
+
+{% include '_navbar.html' %}
+
+<main class="px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
 <!-- State 1: Input State -->
 <section class="py-12 relative overflow-visible" id="input-state">
-<!-- Floating Illustrations -->
 <div class="absolute -top-10 -left-12 w-32 h-32 opacity-80 pointer-events-none rotate-12">
-<img alt="" class="w-full h-full object-contain" data-alt="a vibrant 3D rendered organic tomato with water droplets sitting on a clean surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZNZOgPsNb-qQ6T2L6oa-UM5-yy6dUjxk_baaswvisCi1L2EqHKVPZNKb-Xw6-imVTxW6ZJl3lM-3HW6sdDOjrmOvGvnn0KCCVidD_uk8t-pOMbMx09M1bRiAClMnfV6zxwwns9tM8zx_5LtpuK5NSgr525rkoNyYe7Pv-o9onriQWM68s7kc337oPj9KtMOCn1DHd_cuGxIub9vt5Q-nDuboh1ohq3OFzduRU_-ww2mDIVwkP95iVY9ZVxe-N5RNHNWIm7jwXGLbA"/>
+<img alt="" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZNZOgPsNb-qQ6T2L6oa-UM5-yy6dUjxk_baaswvisCi1L2EqHKVPZNKb-Xw6-imVTxW6ZJl3lM-3HW6sdDOjrmOvGvnn0KCCVidD_uk8t-pOMbMx09M1bRiAClMnfV6zxwwns9tM8zx_5LtpuK5NSgr525rkoNyYe7Pv-o9onriQWM68s7kc337oPj9KtMOCn1DHd_cuGxIub9vt5Q-nDuboh1ohq3OFzduRU_-ww2mDIVwkP95iVY9ZVxe-N5RNHNWIm7jwXGLbA"/>
 </div>
 <div class="absolute top-20 -right-8 w-28 h-28 opacity-80 pointer-events-none -rotate-12">
-<img alt="" class="w-full h-full object-contain" data-alt="a stylized 3D red onion with glistening skin and earthy textures" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxHJsD_JT-EhqAqbL3iY_ZpcQHLfCet1Z63-1cEgBwGVNzJ3xYPLFUfkjausiy1WeXS70vVSg6ncCVP7LhsFFoSTZSNnMGxAXCEWcqbs87p8TnqfaygfY8uD0FI_7IF0K16riT2Yx6cot-WBuev4OONYDgqUrUzJFADtekhbgCizR31ZjH4neH2gRda-lcM0bQ-U6F5B2-y0yA79jha50-jMF-_wuojjCHVlqI578ESSrmN3FOvVLPO8-yLXYWOYEYr5I4Xxg9p8fN"/>
+<img alt="" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxHJsD_JT-EhqAqbL3iY_ZpcQHLfCet1Z63-1cEgBwGVNzJ3xYPLFUfkjausiy1WeXS70vVSg6ncCVP7LhsFFoSTZSNnMGxAXCEWcqbs87p8TnqfaygfY8uD0FI_7IF0K16riT2Yx6cot-WBuev4OONYDgqUrUzJFADtekhbgCizR31ZjH4neH2gRda-lcM0bQ-U6F5B2-y0yA79jha50-jMF-_wuojjCHVlqI578ESSrmN3FOvVLPO8-yLXYWOYEYr5I4Xxg9p8fN"/>
 </div>
 <div class="absolute -bottom-8 right-20 w-36 h-36 opacity-60 pointer-events-none rotate-45">
-<img alt="" class="w-full h-full object-contain" data-alt="fresh green coriander leaves sprig rendered in a soft high-fidelity 3D style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZt4B4HNDoQ3wtw29DfKZhxXEYsdWUyJbOhUYEkQx0hYMvZjoNpJyqU0q8wcE1aJ6zB_w79H3nzU_CyBPql7lgL7tB40fvUusbZlU4ORJz2dWlkDBWiN8Plb4cJGBU8YhU4_dfT3UJziiGIsw47qj6AM91W_D9INrztDlAMVmj879OUwkp9sRYcvE3rCcsq39uebYyOjM5aBPyhU8nz9zRB8qB7dZTmjJDvxegZaFcW5cNE27TM0zBA6Q77hat2JhpOoORAE_k6ID0"/>
+<img alt="" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZt4B4HNDoQ3wtw29DfKZhxXEYsdWUyJbOhUYEkQx0hYMvZjoNpJyqU0q8wcE1aJ6zB_w79H3nzU_CyBPql7lgL7tB40fvUusbZlU4ORJz2dWlkDBWiN8Plb4cJGBU8YhU4_dfT3UJziiGIsw47qj6AM91W_D9INrztDlAMVmj879OUwkp9sRYcvE3rCcsq39uebYyOjM5aBPyhU8nz9zRB8qB7dZTmjJDvxegZaFcW5cNE27TM0zBA6Q77hat2JhpOoORAE_k6ID0"/>
 </div>
 <div class="text-center space-y-6 relative z-10">
 <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 text-primary font-label text-xs font-bold tracking-widest uppercase">
-<span class="material-symbols-outlined text-sm" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
-                    AI-powered
-                </div>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">auto_awesome</span> AI-powered
+</div>
 <h2 class="text-5xl md:text-6xl font-extrabold text-on-background tracking-tight leading-tight">
-                    What are you <br/><span class="text-primary italic">cooking</span> today?
-                </h2>
-<p class="text-on-surface-variant text-lg max-w-lg mx-auto">
-                    Describe a dish or upload a photo of your fridge. We'll handle the portioning and pricing.
-                </p>
-<!-- Input Box -->
+    What are you <br/><span class="text-primary italic">cooking</span> today?
+</h2>
+<p class="text-on-surface-variant text-lg max-w-lg mx-auto">Describe a dish and how many people. We'll find every ingredient from our store.</p>
 <div class="mt-12 max-w-2xl mx-auto">
 <div class="relative group">
-<input class="w-full h-20 pl-8 pr-40 rounded-3xl bg-surface-container-lowest border-none shadow-[0px_4px_20px_rgba(26,28,27,0.04)] focus:ring-2 focus:ring-primary/20 text-on-surface placeholder:text-zinc-400 text-lg transition-all" placeholder="Try 'Daal Pakwaan for 4 guests' or 'Healthy breakfast for 2'..." type="text"/>
-<button class="absolute right-3 top-3 bottom-3 px-8 rounded-2xl premium-gradient text-white font-bold flex items-center gap-2 shadow-lg shadow-primary/20 active:scale-95 transition-transform">
+<input id="plannerInput" class="w-full h-20 pl-8 pr-40 rounded-3xl bg-surface-container-lowest border-none shadow-[0px_4px_20px_rgba(26,28,27,0.04)] focus:ring-2 focus:ring-primary/20 text-on-surface placeholder:text-zinc-400 text-lg transition-all" placeholder="Try 'Daal Pakwaan for 4 guests' ..." type="text"/>
+<button id="planItBtn" class="absolute right-3 top-3 bottom-3 px-8 rounded-2xl premium-gradient text-white font-bold flex items-center gap-2 shadow-lg shadow-primary/20 active:scale-95 transition-transform">
 <span>Plan it</span>
-<span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+<span class="material-symbols-outlined">arrow_forward</span>
 </button>
 </div>
 </div>
-<!-- Suggestion Chips -->
 <div class="flex flex-wrap justify-center gap-3 mt-8">
-<button class="px-5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/15 text-on-surface-variant hover:bg-surface-container-highest transition-colors text-sm font-medium">
-                        Daal Pakwaan for 4
-                    </button>
-<button class="px-5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/15 text-on-surface-variant hover:bg-surface-container-highest transition-colors text-sm font-medium">
-                        Pasta Aglio e Olio
-                    </button>
-<button class="px-5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/15 text-on-surface-variant hover:bg-surface-container-highest transition-colors text-sm font-medium">
-                        Vegan Taco Feast
-                    </button>
-<button class="px-5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/15 text-on-surface-variant hover:bg-surface-container-highest transition-colors text-sm font-medium">
-                        Mediterranean Salad
-                    </button>
+<button class="suggestion-chip px-5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/15 text-on-surface-variant hover:bg-surface-container-highest transition-colors text-sm font-medium">Daal Pakwaan for 4</button>
+<button class="suggestion-chip px-5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/15 text-on-surface-variant hover:bg-surface-container-highest transition-colors text-sm font-medium">Pasta Aglio e Olio</button>
+<button class="suggestion-chip px-5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/15 text-on-surface-variant hover:bg-surface-container-highest transition-colors text-sm font-medium">Paneer Butter Masala for 6</button>
+<button class="suggestion-chip px-5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/15 text-on-surface-variant hover:bg-surface-container-highest transition-colors text-sm font-medium">Chole Bhature for 4</button>
 </div>
 </div>
 </section>
-<!-- State 2: Thinking State (Hidden by default) -->
+
+<!-- State 2: Thinking State -->
 <section class="hidden py-12 max-w-xl mx-auto" id="thinking-state">
 <div class="bg-surface-container-lowest rounded-3xl p-8 shadow-[0px_10px_40px_rgba(26,28,27,0.06)] space-y-8">
 <div class="flex items-center gap-4">
 <div class="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center">
-<span class="material-symbols-outlined text-primary animate-pulse" data-icon="searching">search</span>
+<span class="material-symbols-outlined text-primary animate-pulse">search</span>
 </div>
 <div>
 <h3 class="text-xl font-bold text-on-surface">BasketIQ is planning...</h3>
-<p class="text-on-surface-variant text-sm">Crafting your perfect market list</p>
+<p class="text-on-surface-variant text-sm" id="thinkingDish">Crafting your perfect market list</p>
 </div>
 </div>
-<div class="space-y-4">
-<div class="flex items-center gap-3 text-emerald-700">
-<span class="material-symbols-outlined text-sm" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-<span class="text-sm font-medium">Identifying Daal Pakwaan recipe</span>
-</div>
-<div class="flex items-center gap-3 text-emerald-700">
-<span class="material-symbols-outlined text-sm" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-<span class="text-sm font-medium">Calculating portions for 4 guests</span>
-</div>
+<div class="space-y-4" id="thinkingSteps">
 <div class="flex items-center gap-3 text-zinc-400">
 <div class="w-4 h-4 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin"></div>
-<span class="text-sm font-medium">Finding best prices at nearby markets</span>
+<span class="text-sm font-medium">Analyzing your request with AI...</span>
 </div>
 <div class="flex items-center gap-3 text-zinc-300">
-<span class="material-symbols-outlined text-sm" data-icon="circle">circle</span>
-<span class="text-sm font-medium">Optimizing pantry staples</span>
+<span class="material-symbols-outlined text-sm">circle</span>
+<span class="text-sm font-medium">Finding ingredients in our store</span>
+</div>
+<div class="flex items-center gap-3 text-zinc-300">
+<span class="material-symbols-outlined text-sm">circle</span>
+<span class="text-sm font-medium">Calculating best prices</span>
 </div>
 </div>
 <div class="relative w-full h-2 bg-surface-container rounded-full overflow-hidden">
-<div class="absolute left-0 top-0 h-full w-2/3 premium-gradient rounded-full"></div>
+<div class="absolute top-0 h-full premium-gradient rounded-full animate-progress-bar"></div>
 </div>
 </div>
 </section>
-<!-- State 3: Chart Reveal (Modal Triggered) -->
+
+<!-- State 3: Chart Reveal Modal -->
 <div class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4" id="chart-reveal-modal">
-<div class="absolute inset-0 bg-on-background/40 backdrop-blur-sm"></div>
-<div class="relative bg-background w-full max-w-4xl max-h-[795px] rounded-[32px] overflow-hidden flex flex-col shadow-2xl">
-<!-- Modal Header -->
+<div class="absolute inset-0 bg-on-background/40 backdrop-blur-sm" id="modalOverlay"></div>
+<div class="relative bg-background w-full max-w-4xl max-h-[90vh] rounded-[32px] overflow-hidden flex flex-col shadow-2xl">
 <div class="px-8 py-6 bg-surface-container-lowest flex justify-between items-center shrink-0">
 <div class="flex items-center gap-4">
-<div class="w-14 h-14 rounded-2xl bg-secondary-container/20 flex items-center justify-center overflow-hidden">
-<img alt="" class="w-10 h-10 object-contain" data-alt="a bowl of golden lentils and spices in a premium 3D graphic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuIZC00aWWC5BZazFY_VG5Ja6S2ESEjUO6yTlabTG98LNO7sNnjdO4ceTMA3q2J7VfieZMzmAJ_ZQhPKVY3vPVlmyySkeyVjqiPxNvVmo7zHsr7UQnhfvvpXqLHoAY63obHh5GXr50NJ_aTMBSe9tH1tMU2ZmZdChR5dMiLYO9Dru-FriFSpBm3OVh7Eoar9OkGJrobM0whA06FlBtfwJjanKEaW-JAK2YrrnyesqUQiQZphCSIvVHRpk_68uuY2yGLOcBVyhtunrr"/>
+<div class="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">restaurant</span>
 </div>
 <div>
-<h3 class="text-2xl font-bold text-on-surface">Daal Pakwaan</h3>
+<h3 class="text-2xl font-bold text-on-surface" id="modalDishName">Loading...</h3>
 <div class="flex items-center gap-2 text-on-surface-variant text-sm">
-<span class="material-symbols-outlined text-sm" data-icon="group">group</span>
-                                4 Servings • Estimated $18.40 total
-                            </div>
+<span class="material-symbols-outlined text-sm">group</span>
+<span id="modalServings">...</span>
 </div>
 </div>
-<button class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center hover:bg-surface-variant transition-colors">
-<span class="material-symbols-outlined" data-icon="close">close</span>
+</div>
+<button class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center hover:bg-surface-variant transition-colors" id="closeModalBtn">
+<span class="material-symbols-outlined">close</span>
 </button>
 </div>
-<!-- Tabs -->
-<div class="flex gap-8 px-8 border-b border-surface-container shrink-0 overflow-x-auto bg-surface-container-lowest">
-<button class="pb-4 text-sm font-bold text-primary border-b-2 border-primary">Ingredients</button>
-<button class="pb-4 text-sm font-medium text-on-surface-variant hover:text-on-surface">Recipe Steps</button>
-<button class="pb-4 text-sm font-medium text-on-surface-variant hover:text-on-surface">Nutritional Info</button>
-<button class="pb-4 text-sm font-medium text-on-surface-variant hover:text-on-surface">Alternatives</button>
-</div>
-<!-- Ingredient Table -->
 <div class="flex-1 overflow-y-auto p-8 space-y-6">
 <div class="bg-surface-container-low rounded-2xl overflow-hidden">
 <table class="w-full text-left">
 <thead class="bg-surface-container text-xs font-bold text-on-surface-variant uppercase tracking-widest">
-<tr>
-<th class="px-6 py-4">Item</th>
-<th class="px-6 py-4">Quantity</th>
-<th class="px-6 py-4">Estimated Price</th>
-<th class="px-6 py-4"></th>
-</tr>
+<tr><th class="px-6 py-4">Item</th><th class="px-6 py-4">Qty Needed</th><th class="px-6 py-4">Price</th><th class="px-6 py-4">Status</th><th class="px-6 py-4"></th></tr>
 </thead>
-<tbody class="divide-y divide-surface-container-high/50">
-<tr class="hover:bg-white/40 transition-colors">
-<td class="px-6 py-4 flex items-center gap-3">
-<div class="w-10 h-10 rounded-lg bg-white p-1 flex items-center justify-center shadow-sm">
-<img alt="" class="w-6 h-6" data-alt="a small pile of yellow split peas lentils" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuz98bOiIQD-Byc9lJZxoaP-iLSIKzq8BiUZwJXtlg5SV58tKXBfYV_lgASa-ShdQL-HRC9innLO4Jv1LJRPcyKEfqqUH8MQdejNpM_sJPRr0XPqQu4G61ARojQi1BqYSywm4kgrzoRL4Jpd64DvOFCDd2ckzFvhU-dPTo-Tk2zhDbW-o5LstfsQCmb-qlAsV_mwrUxeywY1dODSQJNBEqvr0D8415WfU6TqzToFVYwAi7bshvE7M_bwJRfkWJkGErqpxXoCyX24MC"/>
-</div>
-<span class="font-semibold text-on-surface">Chana Dal (Lentils)</span>
-</td>
-<td class="px-6 py-4 text-on-surface-variant">250g</td>
-<td class="px-6 py-4 font-bold text-on-surface">$2.50</td>
-<td class="px-6 py-4 text-right">
-<input checked="" class="w-5 h-5 rounded border-outline text-primary focus:ring-primary/20" type="checkbox"/>
-</td>
-</tr>
-<tr class="hover:bg-white/40 transition-colors">
-<td class="px-6 py-4 flex items-center gap-3">
-<div class="w-10 h-10 rounded-lg bg-white p-1 flex items-center justify-center shadow-sm">
-<img alt="" class="w-6 h-6" data-alt="white flour dusting in a professional kitchen setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYnkLcP7Ty9ugtz7O4Ct02xn3Anb8kvf4Y-hoz9z4KYcERcRs2SbT-DVFz76Sb_-yX2_dc8U5BgkW0UYJ2RmWD60aRz_gjJzr24F-JRLYT7Ry0_NAQ8deRnDPmkENnIkcY2sMOJCQExivsOiuASN01QovCrvbzE6col3c3wsyV74b830oANQ9Bq8g0DtyLLMG_ST5vflzsfMwKQqDPKZHqqootSrEh7GcJrxHaEnBJDPrgDXNczXc5ptwaNcbL-qcn9kkT16yIlLbb"/>
-</div>
-<span class="font-semibold text-on-surface">All Purpose Flour</span>
-</td>
-<td class="px-6 py-4 text-on-surface-variant">500g</td>
-<td class="px-6 py-4 font-bold text-on-surface">$3.20</td>
-<td class="px-6 py-4 text-right">
-<input checked="" class="w-5 h-5 rounded border-outline text-primary focus:ring-primary/20" type="checkbox"/>
-</td>
-</tr>
-<tr class="hover:bg-white/40 transition-colors">
-<td class="px-6 py-4 flex items-center gap-3">
-<div class="w-10 h-10 rounded-lg bg-white p-1 flex items-center justify-center shadow-sm">
-<img alt="" class="w-6 h-6" data-alt="a small glass jar of cumin seeds" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBseL-XWV0KzPm-uchBnYg7tuamhHOAI_662gLurAT-1ObRgBBViK4TnW_arJfLu054aWe0ZwV513KhknC3vBQTgl1i-y7cbFBvXGRadRtSX3BMCv_Dx0Dn-ILG5pdv77_M1414Mju4Ay5ti7fqsW_PKF4FObhLhcNPPMTpmY2UikfVrIgf4m68EZIlauhvR2ZR7WfuDqkAcRQ0w4s2C32RLO4482mdFZlGK2QjCeBEwIG9uIu3mcq3rVmlMN2yXEVMoRdtAhx1dktG"/>
-</div>
-<span class="font-semibold text-on-surface">Cumin Seeds</span>
-</td>
-<td class="px-6 py-4 text-on-surface-variant">1 Pack</td>
-<td class="px-6 py-4 font-bold text-on-surface">$4.50</td>
-<td class="px-6 py-4 text-right">
-<input checked="" class="w-5 h-5 rounded border-outline text-primary focus:ring-primary/20" type="checkbox"/>
-</td>
-</tr>
-<tr class="hover:bg-white/40 transition-colors">
-<td class="px-6 py-4 flex items-center gap-3">
-<div class="w-10 h-10 rounded-lg bg-white p-1 flex items-center justify-center shadow-sm">
-<img alt="" class="w-6 h-6" data-alt="golden refined vegetable oil in a clear bottle" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5RPgvdmyLXG9TKlBX4FfFvB-F2pVrptI2GWgijs18ZyiXDItCM4UIah2b9TGKkzf3xKL23ZJPCv4J9UymhSmzdPz-JVHUlQkHrFnDzOQNtQmZw4-OTydji6I_ChwPnIFja3AnSeouplww0AfXVIKNYvJFNlaYVgGMs_SDf44cUeGAt9UyeCUGPGHXP_f-S84KkO-_Mh_i_feD29OwQ9nwgNXiio3NrKj3H7uWYm2A9LxXiw0clLwzMBMlK8_hHdmFX8x5_gGPT-D0"/>
-</div>
-<span class="font-semibold text-on-surface">Vegetable Oil</span>
-</td>
-<td class="px-6 py-4 text-on-surface-variant">1L</td>
-<td class="px-6 py-4 font-bold text-on-surface">$8.20</td>
-<td class="px-6 py-4 text-right">
-<input checked="" class="w-5 h-5 rounded border-outline text-primary focus:ring-primary/20" type="checkbox"/>
-</td>
-</tr>
-</tbody>
+<tbody class="divide-y divide-surface-container-high/50" id="ingredientTableBody"></tbody>
 </table>
 </div>
-<!-- AI Tip -->
 <div class="p-6 bg-emerald-50 rounded-2xl flex gap-4 border border-primary/10">
-<span class="material-symbols-outlined text-primary" data-icon="lightbulb" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
 <div>
-<p class="text-sm font-bold text-primary mb-1">Pantry Optimization</p>
-<p class="text-sm text-on-surface-variant">We noticed you usually have Cumin Seeds in your pantry. Uncheck it to save $4.50 on this trip!</p>
+<p class="text-sm font-bold text-primary mb-1">Smart Tip</p>
+<p class="text-sm text-on-surface-variant" id="aiTipText">Uncheck items you already have at home to save money!</p>
 </div>
 </div>
 </div>
-<!-- Sticky Summary Bar -->
 <div class="px-8 py-6 bg-surface-container-highest border-t border-surface-container flex flex-col sm:flex-row justify-between items-center gap-4 shrink-0">
 <div class="text-center sm:text-left">
-<p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Total for 4 items</p>
-<p class="text-3xl font-extrabold text-on-surface">$18.40</p>
+<p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest" id="summaryLabel">Total for 0 items</p>
+<p class="text-3xl font-extrabold text-on-surface" id="summaryTotal">₹0</p>
 </div>
 <div class="flex gap-4 w-full sm:w-auto">
-<button class="flex-1 sm:px-8 h-14 rounded-2xl bg-white border border-outline-variant font-bold text-on-surface hover:bg-surface-container-low transition-colors">Save List</button>
-<button class="flex-1 sm:px-10 h-14 rounded-2xl premium-gradient text-white font-bold shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">Add all to cart</button>
-</div>
-</div>
-</div>
-</div>
-<!-- Featured Section (Bento Grid) -->
-<section class="mt-24 space-y-8">
-<div class="flex justify-between items-end">
-<div>
-<h3 class="text-3xl font-bold tracking-tight text-on-surface">Popular Planned Meals</h3>
-<p class="text-on-surface-variant">Community favorites for this week</p>
-</div>
-<button class="text-primary font-bold flex items-center gap-1 group">
-                    View all <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform" data-icon="chevron_right">chevron_right</span>
+<button class="flex-1 sm:px-8 h-14 rounded-2xl bg-white border border-outline-variant font-bold text-on-surface hover:bg-surface-container-low transition-colors" id="newPlanBtn">New Plan</button>
+<button class="flex-1 sm:px-10 h-14 rounded-2xl premium-gradient text-white font-bold shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2" id="addToCartBtn">
+    <span class="material-symbols-outlined">shopping_cart</span> Add to Cart
 </button>
 </div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 h-[500px]">
-<div class="md:col-span-2 relative group rounded-3xl overflow-hidden bg-surface-container-lowest shadow-sm hover:shadow-xl transition-all duration-500">
-<img alt="" class="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-700" data-alt="a vibrant rainbow salad bowl with fresh greens, purple cabbage, chickpeas, and a drizzle of dressing in natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtzOQKaH2reL7SMQFJdPkaN4Omwj6g6V9L9UWZCVMejn4gvbu0Gk6eMBQrfGKqAaleLluj3KtBftzxeVqFxlrpPb6lIE6oLJFzNom1on4fCctmdDYNCfcc7DBkG8y5FUunWp6-xZA9p7B2OXmweTD_rASNyJFq-HXA69l62jYR3KDOHdeSC5_ckgaOu4F0FcLqMzGnVAwzBMLnJ67RKEL1VPP14b0SrSvWwTlx80HujA_kpQ7nwfVqIVg7j4pHhuRLiDrEiluXcEU9"/>
-<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-<div class="absolute bottom-0 left-0 p-8 text-white">
-<div class="inline-flex px-3 py-1 bg-secondary-container/90 text-on-secondary-container text-[10px] font-bold rounded-full mb-3 uppercase tracking-wider">High Protein</div>
-<h4 class="text-2xl font-bold">Mediterranean Power Bowl</h4>
-<p class="text-white/80 text-sm mt-1">Serves 2 • 15 mins prep • $12.50 approx.</p>
 </div>
+</div>
+</div>
+
+<!-- Toasts -->
+<div class="hidden fixed top-28 left-1/2 -translate-x-1/2 z-[70] bg-red-50 border border-red-200 text-red-800 px-6 py-4 rounded-2xl shadow-xl max-w-md text-center font-medium" id="errorToast"></div>
+<div class="hidden fixed top-28 left-1/2 -translate-x-1/2 z-[70] bg-emerald-50 border border-emerald-200 text-emerald-800 px-6 py-4 rounded-2xl shadow-xl max-w-md text-center font-medium animate-slide-down" id="successToast"></div>
+
+<!-- Bento Grid -->
+<section class="mt-24 space-y-8" id="featured-section">
+<div><h3 class="text-3xl font-bold tracking-tight text-on-surface">Popular Planned Meals</h3><p class="text-on-surface-variant">Community favorites for this week</p></div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 h-[500px]">
+<div class="md:col-span-2 relative group rounded-3xl overflow-hidden bg-surface-container-lowest shadow-sm hover:shadow-xl transition-all duration-500 cursor-pointer" onclick="autoFillAndPlan('Mediterranean Power Bowl for 2')">
+<img alt="" class="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtzOQKaH2reL7SMQFJdPkaN4Omwj6g6V9L9UWZCVMejn4gvbu0Gk6eMBQrfGKqAaleLluj3KtBftzxeVqFxlrpPb6lIE6oLJFzNom1on4fCctmdDYNCfcc7DBkG8y5FUunWp6-xZA9p7B2OXmweTD_rASNyJFq-HXA69l62jYR3KDOHdeSC5_ckgaOu4F0FcLqMzGnVAwzBMLnJ67RKEL1VPP14b0SrSvWwTlx80HujA_kpQ7nwfVqIVg7j4pHhuRLiDrEiluXcEU9"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-8 text-white"><div class="inline-flex px-3 py-1 bg-amber-400/90 text-amber-900 text-[10px] font-bold rounded-full mb-3 uppercase tracking-wider">High Protein</div><h4 class="text-2xl font-bold">Mediterranean Power Bowl</h4><p class="text-white/80 text-sm mt-1">Serves 2 • 15 mins prep • Click to plan</p></div>
 </div>
 <div class="flex flex-col gap-6">
-<div class="flex-1 bg-surface-container-lowest rounded-3xl p-6 shadow-sm flex flex-col justify-between">
-<div>
-<div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600 mb-4">
-<span class="material-symbols-outlined" data-icon="local_fire_department">local_fire_department</span>
+<div class="flex-1 bg-surface-container-lowest rounded-3xl p-6 shadow-sm flex flex-col justify-between cursor-pointer hover:shadow-lg transition-all" onclick="autoFillAndPlan('Taco Tuesday for 6')">
+<div><div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600 mb-4"><span class="material-symbols-outlined">local_fire_department</span></div><h4 class="font-bold text-on-surface">Taco Tuesday Bundle</h4><p class="text-xs text-on-surface-variant mt-1">Kit for 6 people • Click to plan</p></div>
+<p class="text-2xl font-extrabold text-primary">AI Plan →</p>
 </div>
-<h4 class="font-bold text-on-surface">Taco Tuesday Bundle</h4>
-<p class="text-xs text-on-surface-variant mt-1">Kit for 6 people</p>
-</div>
-<p class="text-2xl font-extrabold text-primary">$24.00</p>
-</div>
-<div class="flex-1 bg-primary rounded-3xl p-6 shadow-sm flex flex-col justify-between text-white premium-gradient">
-<div>
-<div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mb-4">
-<span class="material-symbols-outlined" data-icon="savings">savings</span>
-</div>
-<h4 class="font-bold">Budget Pantry Stock</h4>
-<p class="text-xs text-white/70 mt-1">12 essential items</p>
-</div>
-<p class="text-2xl font-extrabold">$45.00</p>
+<div class="flex-1 premium-gradient rounded-3xl p-6 shadow-sm flex flex-col justify-between text-white cursor-pointer hover:shadow-lg transition-all" onclick="autoFillAndPlan('Budget weekly pantry staples for 4')">
+<div><div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mb-4"><span class="material-symbols-outlined">savings</span></div><h4 class="font-bold">Budget Pantry Stock</h4><p class="text-xs text-white/70 mt-1">12 essential items • Click to plan</p></div>
+<p class="text-2xl font-extrabold">AI Plan →</p>
 </div>
 </div>
 </div>
 </section>
 </main>
-<!-- BottomNavBar -->
-<nav class="fixed bottom-0 left-0 w-full bg-white/85 dark:bg-zinc-950/85 backdrop-blur-xl rounded-t-[24px] z-50 shadow-[0px_-4px_20px_rgba(26,28,27,0.06)] md:hidden">
-<div class="flex justify-around items-center px-4 pt-3 pb-8">
-<div class="flex flex-col items-center justify-center text-zinc-500 dark:text-zinc-400 px-5 py-2">
-<span class="material-symbols-outlined" data-icon="storefront">storefront</span>
-<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium tracking-wide uppercase mt-1">Market</span>
-</div>
-<div class="flex flex-col items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-emerald-900 dark:text-emerald-100 rounded-2xl px-5 py-2">
-<span class="material-symbols-outlined" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
-<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium tracking-wide uppercase mt-1">Planner</span>
-</div>
-<div class="flex flex-col items-center justify-center text-zinc-500 dark:text-zinc-400 px-5 py-2">
-<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
-<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium tracking-wide uppercase mt-1">Recipes</span>
-</div>
-<div class="flex flex-col items-center justify-center text-zinc-500 dark:text-zinc-400 px-5 py-2">
-<span class="material-symbols-outlined" data-icon="person">person</span>
-<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-medium tracking-wide uppercase mt-1">Account</span>
-</div>
-</div>
-</nav>
-<!-- Floating UI triggers for demonstration of states -->
-<div class="fixed bottom-24 right-6 flex flex-col gap-3 z-40">
-<button class="w-12 h-12 bg-white rounded-full shadow-lg border border-outline-variant flex items-center justify-center text-zinc-600 hover:bg-zinc-50" onclick="document.getElementById('input-state').classList.remove('hidden'); document.getElementById('thinking-state').classList.add('hidden'); document.getElementById('chart-reveal-modal').classList.add('hidden')">1</button>
-<button class="w-12 h-12 bg-white rounded-full shadow-lg border border-outline-variant flex items-center justify-center text-zinc-600 hover:bg-zinc-50" onclick="document.getElementById('input-state').classList.add('hidden'); document.getElementById('thinking-state').classList.remove('hidden'); document.getElementById('chart-reveal-modal').classList.add('hidden')">2</button>
-<button class="w-12 h-12 bg-white rounded-full shadow-lg border border-outline-variant flex items-center justify-center text-zinc-600 hover:bg-zinc-50" onclick="document.getElementById('chart-reveal-modal').classList.remove('hidden')">3</button>
-</div>
+
+<script>
+const BASE_URL = '';
+const inputState     = document.getElementById('input-state');
+const thinkingState  = document.getElementById('thinking-state');
+const chartModal     = document.getElementById('chart-reveal-modal');
+const plannerInput   = document.getElementById('plannerInput');
+const planItBtn      = document.getElementById('planItBtn');
+const closeModalBtn  = document.getElementById('closeModalBtn');
+const modalOverlay   = document.getElementById('modalOverlay');
+const addToCartBtn   = document.getElementById('addToCartBtn');
+const newPlanBtn     = document.getElementById('newPlanBtn');
+const errorToast     = document.getElementById('errorToast');
+const successToast   = document.getElementById('successToast');
+
+let currentPlanData = null;
+
+function showInput()    { inputState.classList.remove('hidden'); thinkingState.classList.add('hidden'); chartModal.classList.add('hidden'); }
+function showThinking() { inputState.classList.add('hidden');    thinkingState.classList.remove('hidden'); chartModal.classList.add('hidden'); }
+function showModal()    { chartModal.classList.remove('hidden'); thinkingState.classList.add('hidden'); }
+
+function showError(msg) { errorToast.textContent = msg; errorToast.classList.remove('hidden'); setTimeout(() => errorToast.classList.add('hidden'), 5000); }
+function showSuccess(msg) { successToast.textContent = msg; successToast.classList.remove('hidden'); setTimeout(() => successToast.classList.add('hidden'), 4000); }
+
+function getCookie(name) {
+    let v = null;
+    document.cookie.split(';').forEach(c => { c = c.trim(); if (c.startsWith(name + '=')) v = decodeURIComponent(c.substring(name.length + 1)); });
+    return v;
+}
+
+async function generatePlan(query) {
+    if (!query.trim()) { showError('Please type what you want to cook!'); return; }
+    showThinking();
+    document.getElementById('thinkingDish').textContent = `Planning: "${query}"`;
+    try {
+        const res = await fetch(`${BASE_URL}/api/planner/generate/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            body: JSON.stringify({ query })
+        });
+        const data = await res.json();
+        if (data.error) { showInput(); showError(data.error); return; }
+        currentPlanData = data;
+        renderModal(data);
+        showModal();
+    } catch (err) { showInput(); showError('Network error. Please try again.'); console.error(err); }
+}
+
+function renderModal(data) {
+    document.getElementById('modalDishName').textContent = data.dish || 'Your Dish';
+    document.getElementById('modalServings').textContent = `${data.servings || '?'} Servings • Estimated ₹${data.total_price || 0} total`;
+    const tbody = document.getElementById('ingredientTableBody');
+    tbody.innerHTML = '';
+    data.items.forEach((item, idx) => {
+        const effectivePrice = item.matched ? Math.round(item.product_price * (1 - item.discount / 100)) : 0;
+        const statusBadge = item.matched
+            ? `<span class="px-2 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full">In Stock</span>`
+            : `<span class="px-2 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-full">Not Found</span>`;
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-white/40 transition-colors';
+        row.innerHTML = `
+            <td class="px-6 py-4 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-white p-1 flex items-center justify-center shadow-sm">
+                    ${item.product_image ? `<img alt="" class="w-6 h-6" src="${item.product_image}"/>` : `<span class="material-symbols-outlined text-zinc-400">inventory_2</span>`}
+                </div>
+                <div><span class="font-semibold text-on-surface">${item.product_name}</span><span class="block text-[10px] text-on-surface-variant">${item.product_category || ''}</span></div>
+            </td>
+            <td class="px-6 py-4 text-on-surface-variant">${item.needed_quantity}</td>
+            <td class="px-6 py-4 font-bold text-on-surface">${item.matched ? '₹' + effectivePrice : '—'}</td>
+            <td class="px-6 py-4">${statusBadge}</td>
+            <td class="px-6 py-4 text-right"><input type="checkbox" class="item-checkbox w-5 h-5 rounded border-outline text-primary focus:ring-primary/20" data-idx="${idx}" ${item.matched ? 'checked' : ''} ${!item.matched ? 'disabled' : ''}/></td>`;
+        tbody.appendChild(row);
+    });
+    tbody.querySelectorAll('.item-checkbox').forEach(cb => cb.addEventListener('change', updateSummary));
+    updateSummary();
+    const unmatched = data.items.filter(i => !i.matched);
+    document.getElementById('aiTipText').textContent = unmatched.length > 0
+        ? `${unmatched.length} item(s) weren't found in our store. You may need to source them separately.`
+        : `All ingredients are available! Uncheck anything you already have at home to save money.`;
+}
+
+function updateSummary() {
+    if (!currentPlanData) return;
+    const checkboxes = document.querySelectorAll('.item-checkbox');
+    let total = 0, count = 0;
+    checkboxes.forEach(cb => {
+        if (cb.checked) {
+            const item = currentPlanData.items[parseInt(cb.dataset.idx)];
+            if (item && item.matched) { total += Math.round(item.product_price * (1 - item.discount / 100)); count++; }
+        }
+    });
+    document.getElementById('summaryLabel').textContent = `Total for ${count} item${count !== 1 ? 's' : ''}`;
+    document.getElementById('summaryTotal').textContent = `₹${total}`;
+}
+
+async function addCheckedToCart() {
+    if (!currentPlanData) return;
+    const selectedItems = [];
+    document.querySelectorAll('.item-checkbox').forEach(cb => {
+        if (cb.checked) {
+            const item = currentPlanData.items[parseInt(cb.dataset.idx)];
+            if (item && item.matched) {
+                selectedItems.push({
+                    product_id: item.product_id,
+                    product_name: item.product_name,
+                    quantity: 1,
+                    price: Math.round(item.product_price * (1 - item.discount / 100)),
+                    image_url: item.product_image || '',
+                });
+            }
+        }
+    });
+    if (selectedItems.length === 0) { showError('No items selected!'); return; }
+
+    // Show loading on button
+    addToCartBtn.disabled = true;
+    addToCartBtn.innerHTML = '<div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Adding...';
+
+    try {
+        const token = localStorage.getItem('token') || '';
+        const res = await fetch(`${BASE_URL}/api/planner/add-to-cart/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            body: JSON.stringify({ items: selectedItems, token })
+        });
+        const data = await res.json();
+        if (data.success) {
+            _navSetCartCount(data.cart_count);
+            _navRefreshCart();
+            chartModal.classList.add('hidden');
+            showInput();
+            showSuccess(`✅ ${selectedItems.length} item(s) added to your cart! View in Cart →`);
+            plannerInput.value = '';
+        } else { showError(data.error || 'Failed to add to cart'); }
+    } catch (err) { showError('Network error while adding to cart'); console.error(err); }
+
+    addToCartBtn.disabled = false;
+    addToCartBtn.innerHTML = '<span class="material-symbols-outlined">shopping_cart</span> Add to Cart';
+}
+
+function autoFillAndPlan(text) { plannerInput.value = text; generatePlan(text); }
+
+planItBtn.addEventListener('click', () => generatePlan(plannerInput.value));
+plannerInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') generatePlan(plannerInput.value); });
+document.querySelectorAll('.suggestion-chip').forEach(chip => chip.addEventListener('click', () => autoFillAndPlan(chip.textContent.trim())));
+closeModalBtn.addEventListener('click', () => { chartModal.classList.add('hidden'); showInput(); });
+modalOverlay.addEventListener('click', () => { chartModal.classList.add('hidden'); showInput(); });
+addToCartBtn.addEventListener('click', addCheckedToCart);
+newPlanBtn.addEventListener('click', () => { chartModal.classList.add('hidden'); showInput(); plannerInput.value = ''; plannerInput.focus(); });
+</script>
 </body></html>

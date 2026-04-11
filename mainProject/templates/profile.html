@@ -24,42 +24,27 @@
         }
     </script>
     <style>
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        .modal {
-            transition: opacity 0.25s ease;
-        }
-
-        body.modal-active {
-            overflow-x: hidden;
-            overflow-y: visible !important;
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f9f9f6; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .modal { transition: opacity 0.25s ease; }
+        body.modal-active { overflow-x: hidden; overflow-y: visible !important; }
+        @keyframes sk { 0%{background-color:#e5e7eb} 50%{background-color:#f3f4f6} 100%{background-color:#e5e7eb} }
+        .skeleton { animation: sk 1.5s infinite ease-in-out; border-radius: 0.75rem; }
     </style>
 </head>
 
-<body class="bg-background font-['Plus_Jakarta_Sans']">
-    <!-- Navbar -->
-    <header class="fixed top-0 w-full z-50 bg-white/85 backdrop-blur-xl shadow-sm">
-        <nav class="flex justify-between items-center max-w-7xl mx-auto px-6 h-20">
-            <a href="index.html" class="flex items-center gap-2 text-xl font-extrabold text-emerald-800">
-                <span class="material-symbols-outlined text-emerald-700">shopping_basket</span>
-                <span>BasketIQ</span>
-            </a>
-            <div class="flex items-center gap-6 text-sm font-bold">
-                <a href="index.html" class="text-zinc-500 hover:text-primary">Shop</a>
-                <button onclick="api.logout()" class="text-red-500">Logout</button>
-            </div>
-        </nav>
-    </header>
+<body class="bg-background font-['Plus_Jakarta_Sans'] pt-24 pb-28">
 
-    <main class="pt-32 pb-12 px-6 max-w-5xl mx-auto">
+<script>
+    const token = localStorage.getItem('token');
+    if (!token) { window.location.href = '/login/'; }
+</script>
+
+{% include '_navbar.html' %}
+
+    <main class="pt-12 pb-12 px-6 max-w-5xl mx-auto">
         <!-- Section 1: User Profile Info -->
         <section
             class="bg-white p-8 rounded-[2.5rem] shadow-sm mb-10 border border-zinc-50 flex flex-col md:flex-row items-center gap-8 relative overflow-hidden">
@@ -225,7 +210,49 @@
         </div>
     </div>
 
-    <script src="js/api.js"></script>
+    <script>
+        // Inline API utility (replaces external api.js)
+        const BASE_URL = '';
+        const api = {
+            getAuthHeader() {
+                const token = localStorage.getItem('token');
+                return token ? { 'Authorization': `Bearer ${token}` } : {};
+            },
+            async getProfile() {
+                const response = await fetch(`${BASE_URL}/api/profile/profile/`, { headers: this.getAuthHeader() });
+                return response.json();
+            },
+            async updateProfile(data) {
+                const response = await fetch(`${BASE_URL}/api/profile/profile/`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', ...this.getAuthHeader() },
+                    body: JSON.stringify(data)
+                });
+                return response.json();
+            },
+            async getExpenses() {
+                const response = await fetch(`${BASE_URL}/api/expenses/expenses/`, { headers: this.getAuthHeader() });
+                return response.json();
+            },
+            async addExpense(data) {
+                const response = await fetch(`${BASE_URL}/api/expenses/expenses/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...this.getAuthHeader() },
+                    body: JSON.stringify(data)
+                });
+                return response.json();
+            },
+            async getExpenseGraph(type) {
+                const response = await fetch(`${BASE_URL}/api/expenses/expense-graph/${type}/`, { headers: this.getAuthHeader() });
+                return response.json();
+            },
+            async getOrders() {
+                const response = await fetch(`${BASE_URL}/api/orders/orders/`, { headers: this.getAuthHeader() });
+                return response.json();
+            },
+            logout() { localStorage.clear(); window.location.href = '/login/'; }
+        };
+    </script>
     <script>
         let currentProfileData = {};
 
