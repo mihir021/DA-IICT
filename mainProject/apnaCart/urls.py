@@ -11,6 +11,7 @@ urlpatterns = [
     path("index/", views.index_page, name="index"),
     path("profile/", views.profile_page, name="profile"),
     path("cart/", views.cart_page, name="cart"),
+    path("product/<str:product_id>/", views.product_page, name="product"),
 
     # ── Auth API ────────────────────────────────────────────────────
     path("api/auth/signup/", views.api_signup, name="api_signup"),
@@ -20,6 +21,8 @@ urlpatterns = [
     path("api/auth/products/", views.api_products, name="api_products"),
     path("api/auth/products/best-sellers/", views.api_best_sellers, name="api_best_sellers"),
     path("api/auth/products/offers/", views.api_offers, name="api_offers"),
+    path("api/auth/products/<str:product_id>/", views.api_product_detail, name="api_product_detail"),
+    path("api/auth/products/<str:product_id>/suggestions/", views.api_product_suggestions, name="api_product_suggestions"),
 
     # ── AI Planner API ──────────────────────────────────────────────
     path("api/planner/generate/", views.api_planner_generate, name="api_planner_generate"),
@@ -40,4 +43,7 @@ urlpatterns = [
 
     # ── Orders API ──────────────────────────────────────────────────
     path("api/orders/orders/", views.api_orders, name="api_orders"),
+
+    # ── Session Tracking (Dynamic Pricing) ──────────────────────────
+    path("api/session/track/", views.api_track_session, name="api_track_session"),
 ]

@@ -18,7 +18,12 @@ _client = None
 def _get_client():
     global _client
     if _client is None:
-        _client = MongoClient(settings.MONGODB_URI)
+        _client = MongoClient(
+            settings.MONGODB_URI,
+            serverSelectionTimeoutMS=5000,
+            connectTimeoutMS=5000,
+            socketTimeoutMS=10000,
+        )
     return _client
 
 
