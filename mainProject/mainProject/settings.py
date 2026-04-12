@@ -17,8 +17,9 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load .env file
+# Load .env from project folder and repo root
 load_dotenv(BASE_DIR / ".env")
+load_dotenv(BASE_DIR.parent / ".env")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -30,7 +31,7 @@ SECRET_KEY = os.getenv(
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "True") == "True"
+DEBUG = (os.getenv("DJANGO_DEBUG") or os.getenv("DEBUG", "True")) == "True"
 
 ALLOWED_HOSTS = ["*"]
 
@@ -133,8 +134,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # ------------------------------------------------------------------
 # MongoDB Configuration (for products, cart, orders — NOT Django auth)
 # ------------------------------------------------------------------
-MONGODB_URI = os.getenv("MONGODB_URI", "")
-MONGODB_DB_NAME = os.getenv("MONGODB_DB_NAME", "pulseprice_admin")
+MONGODB_URI = os.getenv("MONGODB_URI") or os.getenv("MONGO_URI", "")
+MONGODB_DB_NAME = os.getenv("MONGODB_DB_NAME") or os.getenv("MONGO_DB_NAME", "pulseprice_admin")
 
 # ------------------------------------------------------------------
 # OpenAI Configuration
@@ -148,6 +149,8 @@ OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
+    "http://localhost:8001",
+    "http://127.0.0.1:8001",
     "http://localhost:63342",
 ]
 

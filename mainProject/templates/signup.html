@@ -57,9 +57,14 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
-        const result = await response.json();
+        let result = {};
+        try {
+            result = await response.json();
+        } catch (_) {
+            result = {};
+        }
 
-        if (result.token) {
+        if (response.ok && result.token) {
             // Auto-login: store token and name, then redirect to home
             localStorage.setItem('token', result.token);
             localStorage.setItem('user_name', result.name);
@@ -67,14 +72,15 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
             window.location.href = '/index/';
         } else {
             const errEl = document.getElementById('signupError');
-            errEl.textContent = result.error || 'Check your details and try again.';
+            const backendMsg = result.error || result.detail;
+            errEl.textContent = backendMsg || `Signup failed (${response.status}). Please try again.`;
             errEl.classList.remove('hidden');
             btn.disabled = false;
             btn.innerHTML = 'Create Account';
         }
     } catch (err) {
         const errEl = document.getElementById('signupError');
-        errEl.textContent = 'Network error. Is the server running?';
+        errEl.textContent = 'Cannot reach backend. Make sure user server is running on 127.0.0.1:8001.';
         errEl.classList.remove('hidden');
         btn.disabled = false;
         btn.innerHTML = 'Create Account';

@@ -218,13 +218,19 @@ def api_planner_generate(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST required"}, status=405)
 
-    data = json.loads(request.body)
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({"error": "Invalid JSON body."}, status=400)
     query = data.get("query", "").strip()
 
     if not query:
         return JsonResponse({"error": "Please describe what you want to cook."}, status=400)
 
-    result = generate_plan(query)
+    try:
+        result = generate_plan(query)
+    except Exception as exc:
+        return JsonResponse({"error": f"Planner failed: {str(exc)}"}, status=500)
 
     if "error" in result:
         return JsonResponse(result, status=500)

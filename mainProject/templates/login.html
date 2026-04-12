@@ -53,7 +53,12 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
-        const result = await response.json();
+        let result = {};
+        try {
+            result = await response.json();
+        } catch (_) {
+            result = {};
+        }
 
         if (response.ok && result.token) {
             localStorage.setItem('token', result.token);
@@ -61,14 +66,15 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             window.location.href = '/index/';
         } else {
             const errEl = document.getElementById('loginError');
-            errEl.textContent = result.error || 'Login failed! Check email and password.';
+            const backendMsg = result.error || result.detail;
+            errEl.textContent = backendMsg || `Login failed (${response.status}). Check email/password.`;
             errEl.classList.remove('hidden');
             btn.disabled = false;
             btn.innerHTML = 'Login Now';
         }
     } catch (err) {
         const errEl = document.getElementById('loginError');
-        errEl.textContent = 'Network error. Is the server running?';
+        errEl.textContent = 'Cannot reach backend. Make sure user server is running on 127.0.0.1:8001.';
         errEl.classList.remove('hidden');
         btn.disabled = false;
         btn.innerHTML = 'Login Now';

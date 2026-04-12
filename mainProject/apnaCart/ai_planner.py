@@ -10,13 +10,18 @@ Flow:
 
 import json
 import logging
+import re
 
-from openai import OpenAI
 from django.conf import settings
 
 from . import mongo_client
 
 logger = logging.getLogger(__name__)
+
+try:
+    from openai import OpenAI
+except ImportError:  # optional dependency
+    OpenAI = None
 
 # ---------------------------------------------------------------------------
 # OpenAI client (lazy singleton)
@@ -25,6 +30,10 @@ _openai_client = None
 
 
 def _get_openai():
+    if OpenAI is None:
+        raise RuntimeError(
+            "OpenAI SDK is not installed. Run: pip install -r mainProject/requirements.txt"
+        )
     global _openai_client
     if _openai_client is None:
         _openai_client = OpenAI(api_key=settings.OPENAI_API_KEY)
@@ -66,12 +75,103 @@ Rules:
 - Keep ingredient names short and generic (not brand names).
 """
 
+_DISH_LIBRARY = {
+    "sev tameta": [
+        {"name": "Tomato", "quantity": "500", "unit": "g", "category": "Vegetables"},
+        {"name": "Sev", "quantity": "200", "unit": "g", "category": "Pantry"},
+        {"name": "Onion", "quantity": "2", "unit": "pcs", "category": "Vegetables"},
+        {"name": "Ginger", "quantity": "20", "unit": "g", "category": "Vegetables"},
+        {"name": "Green Chili", "quantity": "2", "unit": "pcs", "category": "Vegetables"},
+        {"name": "Coriander", "quantity": "30", "unit": "g", "category": "Vegetables"},
+        {"name": "Oil", "quantity": "2", "unit": "tbsp", "category": "Oil"},
+        {"name": "Salt", "quantity": "1", "unit": "tsp", "category": "Spices"},
+        {"name": "Turmeric", "quantity": "0.5", "unit": "tsp", "category": "Spices"},
+        {"name": "Red Chili Powder", "quantity": "1", "unit": "tsp", "category": "Spices"},
+    ],
+    "paneer butter masala": [
+        {"name": "Paneer", "quantity": "400", "unit": "g", "category": "Dairy"},
+        {"name": "Tomato", "quantity": "400", "unit": "g", "category": "Vegetables"},
+        {"name": "Onion", "quantity": "2", "unit": "pcs", "category": "Vegetables"},
+        {"name": "Butter", "quantity": "3", "unit": "tbsp", "category": "Dairy"},
+        {"name": "Cream", "quantity": "120", "unit": "ml", "category": "Dairy"},
+        {"name": "Salt", "quantity": "1", "unit": "tsp", "category": "Spices"},
+        {"name": "Red Chili Powder", "quantity": "1", "unit": "tsp", "category": "Spices"},
+        {"name": "Garam Masala", "quantity": "1", "unit": "tsp", "category": "Spices"},
+        {"name": "Oil", "quantity": "1", "unit": "tbsp", "category": "Oil"},
+    ],
+    "chole bhature": [
+        {"name": "Kabuli Chana", "quantity": "400", "unit": "g", "category": "Pulses"},
+        {"name": "Maida", "quantity": "500", "unit": "g", "category": "Flour"},
+        {"name": "Curd", "quantity": "150", "unit": "ml", "category": "Dairy"},
+        {"name": "Onion", "quantity": "2", "unit": "pcs", "category": "Vegetables"},
+        {"name": "Tomato", "quantity": "3", "unit": "pcs", "category": "Vegetables"},
+        {"name": "Oil", "quantity": "500", "unit": "ml", "category": "Oil"},
+        {"name": "Salt", "quantity": "1.5", "unit": "tsp", "category": "Spices"},
+    ],
+}
+
+
+def _extract_servings(user_input: str) -> int:
+    m = re.search(r"\bfor\s+(\d{1,2})\b", user_input.lower())
+    if m:
+        return max(1, int(m.group(1)))
+    digits = re.findall(r"\b(\d{1,2})\b", user_input)
+    if digits:
+        return max(1, int(digits[-1]))
+    return 2
+
+
+def _normalize_dish_name(user_input: str) -> str:
+    text = user_input.lower().strip()
+    text = re.sub(r"\bfor\s+\d{1,2}\b", "", text).strip()
+    text = re.sub(r"\s+", " ", text)
+    aliases = {
+        "sev tmeta": "sev tameta",
+        "sev tameta nu shaak": "sev tameta",
+        "pbm": "paneer butter masala",
+    }
+    return aliases.get(text, text)
+
+
+def _scale_ingredients(items: list[dict], servings: int) -> list[dict]:
+    # Base recipes in library assume 4 servings.
+    factor = max(servings, 1) / 4.0
+    scaled = []
+    for item in items:
+        q = item.get("quantity", "1")
+        try:
+            val = float(q)
+            out = str(round(val * factor, 2)).rstrip("0").rstrip(".")
+        except Exception:  # noqa: BLE001
+            out = q
+        scaled.append({**item, "quantity": out})
+    return scaled
+
+
+def _fallback_parse(user_input: str) -> dict:
+    servings = _extract_servings(user_input)
+    dish = _normalize_dish_name(user_input)
+    if dish in _DISH_LIBRARY:
+        ingredients = _scale_ingredients(_DISH_LIBRARY[dish], servings)
+        return {"dish": dish.title(), "servings": servings, "ingredients": ingredients}
+    # Generic minimal pantry fallback for unknown dishes
+    ingredients = _scale_ingredients(
+        [
+            {"name": "Onion", "quantity": "2", "unit": "pcs", "category": "Vegetables"},
+            {"name": "Tomato", "quantity": "3", "unit": "pcs", "category": "Vegetables"},
+            {"name": "Oil", "quantity": "2", "unit": "tbsp", "category": "Oil"},
+            {"name": "Salt", "quantity": "1", "unit": "tsp", "category": "Spices"},
+            {"name": "Green Chili", "quantity": "2", "unit": "pcs", "category": "Vegetables"},
+        ],
+        servings,
+    )
+    return {"dish": dish.title() or "Custom Dish", "servings": servings, "ingredients": ingredients}
+
 
 def parse_dish_request(user_input: str) -> dict:
     """Send the user's natural-language request to OpenAI and return parsed JSON."""
-    client = _get_openai()
-
     try:
+        client = _get_openai()
         response = client.chat.completions.create(
             model=settings.OPENAI_MODEL,
             messages=[
@@ -98,8 +198,8 @@ def parse_dish_request(user_input: str) -> dict:
         logger.error("OpenAI returned invalid JSON: %s", e)
         return {"error": "AI returned an invalid response. Please try again."}
     except Exception as e:
-        logger.error("OpenAI API error: %s", e)
-        return {"error": f"AI service error: {str(e)}"}
+        logger.warning("OpenAI unavailable, using fallback parser: %s", e)
+        return _fallback_parse(user_input)
 
 
 # ---------------------------------------------------------------------------

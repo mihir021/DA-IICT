@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>PulsePrice Admin</title>
@@ -321,7 +321,7 @@ tbody tr:hover { background: rgba(201, 169, 110, 0.04); }
 <!-- =========== PRODUCTS =========== -->
 <section class="section" id="products">
   <div class="card" style="margin-bottom:18px"><div class="row"><div><h3>Products</h3></div><button class="btn primary">+ Add Product</button></div><div class="top-actions" style="margin-top:14px"><input class="search" type="search" placeholder="Search products, SKU, category"><select class="select" id="catFilter"><option>All Categories</option></select><select class="select"><option>All Price Ranges</option><option>$0-$5</option><option>$5-$10</option><option>$10-$15</option><option>$15+</option></select><select class="select"><option>All Status</option><option>Active</option><option>Paused</option><option>Out of Stock</option></select></div></div>
-  <div class="card"><div class="table"><table><thead><tr><th>SKU</th><th>Product Name</th><th>Category</th><th>Base Price</th><th>Current Price</th><th>Cost</th><th>Margin %</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead><tbody id="tbProducts"></tbody></table></div><div class="row" style="margin-top:14px"><div class="muted" id="productCount">Loading...</div><div><button class="tiny">Prev</button> <button class="tiny">Next</button></div></div></div>
+  <div class="card"><div class="table"><table><thead><tr><th style="width:60px">Image</th><th>SKU</th><th>Product Name</th><th>Category</th><th>Base Price</th><th>Current Price</th><th>Cost</th><th>Margin %</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead><tbody id="tbProducts"></tbody></table></div><div class="row" style="margin-top:14px"><div class="muted" id="productCount">Loading...</div><div><button class="tiny">Prev</button> <button class="tiny">Next</button></div></div></div>
 </section>
 
 <!-- =========== USERS & SEGMENTS =========== -->
@@ -369,21 +369,21 @@ tbody tr:hover { background: rgba(201, 169, 110, 0.04); }
       </div>
       <div class="flab-note-body" id="flabNoteBody">
         <strong>RECOMMENDED MODEL: XGBoost (Gradient Boosting)</strong><br><br>
-        <strong>WHY XGBoost FOR GROCERY?</strong><br>
-        XGBoost performs strongly for grocery forecasting across seasonality, promotions, and holidays. It typically outperforms simple regression and ARIMA in mixed-category retail data.<br><br>
+        <strong>WHY XGBoost FOR RETAIL/E-COMMERCE?</strong><br>
+        XGBoost performs strongly for e-commerce clickstream forecasting across seasonal patterns, demand velocity, and user behavior. It typically outperforms simple regression and ARIMA for multi-category retail clickstream data.<br><br>
         <strong>WHAT DATA DO YOU NEED?</strong><br>
-        Minimum: 6 months daily history. Ideal: 1–2 years to capture festivals and seasonal shifts.<br><br>
+        Minimum: 3 months of clickstream events. Ideal: 1+ year to capture seasonal trends and campaign effects.<br><br>
         <strong>WHERE TO GET TRAINING DATA?</strong><br>
-        Option 1: Kaggle Store Sales Time Series Forecasting (Favorita, 54 stores, 33 product families, 4+ years).<br>
-        Option 2: Upload CSV with: date, product_name, category, units_sold, price, on_promotion.<br><br>
+        Option 1: Use the loaded clickstream_events.parquet (10.2M events, 500K users, 5,368 SKUs, Jan-Dec 2024).<br>
+        Option 2: Upload CSV with: timestamp, user_id, event_type, sku_id, category, price_seen_usd, quantity.<br><br>
         <strong>KEY FEATURES:</strong>
         <ul>
-          <li>day_of_week, day_of_month, month, is_weekend, is_holiday, is_promotion</li>
-          <li>lag_7, lag_14, lag_28, rolling_mean_7, rolling_mean_30</li>
-          <li>category and current price</li>
+          <li>day_of_week, hour_of_day, user_segment, device_type, referral_source, ab_group</li>
+          <li>session_duration_s, scroll_depth_pct, time_on_page_s, price_seen_usd, quantity</li>
+          <li>category, is_mobile, search_query presence</li>
         </ul>
-        <strong>TRAIN / TEST SPLIT:</strong> TimeSeriesSplit only. Train on older dates, test on recent dates. Never shuffle.<br><br>
-        <strong>METRIC:</strong> RMSLE (target: below 0.5 for a strong grocery model).
+        <strong>TRAIN / TEST SPLIT:</strong> TimeSeriesSplit on timestamp. Train on Jan-Sep 2024, test on Oct-Dec 2024. Never shuffle.<br><br>
+        <strong>METRIC:</strong> RMSLE (target: below 0.5) and AUC-ROC for conversion prediction.
       </div>
     </div>
 
@@ -392,17 +392,17 @@ tbody tr:hover { background: rgba(201, 169, 110, 0.04); }
       <h3>🛠️ Train Forecast Model</h3>
 
       <div class="src-row">
-        <button class="src-btn active" id="srcKaggle">Use Kaggle Sample Data ✓</button>
+        <button class="src-btn active" id="srcKaggle">Use Clickstream Dataset ✓</button>
         <button class="src-btn" id="srcUpload">Upload My CSV</button>
       </div>
-      <div class="src-note" id="kaggleNote">Using built-in Favorita grocery dataset (2013–2017, 54 stores, 33 product families). Good for demo.</div>
-      <div class="upload-zone" id="uploadZone" style="display:none">Drag & drop your sales CSV here or click to browse.<br>Required columns: date, product_name, category, units_sold, price, on_promotion</div>
+      <div class="src-note" id="kaggleNote">Using loaded clickstream_events.parquet (2024, 10.2M events, 500K users, 5 categories). Ready for training.</div>
+      <div class="upload-zone" id="uploadZone" style="display:none">Drag & drop your clickstream CSV here or click to browse.<br>Required columns: timestamp, user_id, event_type, sku_id, category, price_seen_usd</div>
 
       <div class="flab-grid">
         <div class="flab-field"><label>Forecast Horizon</label><select><option>7 days</option><option>14 days</option><option selected>30 days</option></select></div>
         <div class="flab-field"><label>Train/Test Split</label><select><option>70/30</option><option selected>80/20</option><option>90/10</option></select></div>
         <div class="flab-field"><label>Model Type</label><select><option selected>XGBoost (Recommended)</option><option>Random Forest</option><option>LightGBM</option></select></div>
-        <div class="flab-field"><label>Category Filter</label><select><option selected>All Categories</option><option>Dairy</option><option>Grains</option><option>Vegetables</option><option>Beverages</option><option>Snacks</option><option>Household</option></select></div>
+        <div class="flab-field"><label>Category Filter</label><select><option selected>All Categories</option><option>Electronics</option><option>Home &amp; Kitchen</option><option>Beauty &amp; Health</option><option>Clothing</option><option>Books &amp; Media</option></select></div>
       </div>
 
       <div style="margin-top:12px">
@@ -423,13 +423,13 @@ tbody tr:hover { background: rgba(201, 169, 110, 0.04); }
           <div class="metric-pill"><span class="k">Training Time</span><span class="v">10.2s</span></div>
         </div>
         <div style="margin-top:10px">
-          <div class="fi-row"><span>rolling_mean_7</span><div class="fi-track"><div class="fi-fill" style="width:100%"></div></div><strong>0.31</strong></div>
-          <div class="fi-row"><span>lag_7</span><div class="fi-track"><div class="fi-fill" style="width:77%"></div></div><strong>0.24</strong></div>
-          <div class="fi-row"><span>lag_14</span><div class="fi-track"><div class="fi-fill" style="width:58%"></div></div><strong>0.18</strong></div>
-          <div class="fi-row"><span>month</span><div class="fi-track"><div class="fi-fill" style="width:45%"></div></div><strong>0.14</strong></div>
-          <div class="fi-row"><span>is_promotion</span><div class="fi-track"><div class="fi-fill" style="width:29%"></div></div><strong>0.09</strong></div>
+          <div class="fi-row"><span>scroll_depth_pct</span><div class="fi-track"><div class="fi-fill" style="width:100%"></div></div><strong>0.28</strong></div>
+          <div class="fi-row"><span>session_duration</span><div class="fi-track"><div class="fi-fill" style="width:77%"></div></div><strong>0.22</strong></div>
+          <div class="fi-row"><span>price_seen_usd</span><div class="fi-track"><div class="fi-fill" style="width:58%"></div></div><strong>0.19</strong></div>
+          <div class="fi-row"><span>hour_of_day</span><div class="fi-track"><div class="fi-fill" style="width:45%"></div></div><strong>0.14</strong></div>
+          <div class="fi-row"><span>user_segment</span><div class="fi-track"><div class="fi-fill" style="width:29%"></div></div><strong>0.09</strong></div>
           <div class="fi-row"><span>day_of_week</span><div class="fi-track"><div class="fi-fill" style="width:19%"></div></div><strong>0.06</strong></div>
-          <div class="fi-row"><span>is_holiday</span><div class="fi-track"><div class="fi-fill" style="width:13%"></div></div><strong>0.04</strong></div>
+          <div class="fi-row"><span>referral_source</span><div class="fi-track"><div class="fi-fill" style="width:13%"></div></div><strong>0.04</strong></div>
           <div class="fi-row"><span>price</span><div class="fi-track"><div class="fi-fill" style="width:10%"></div></div><strong>0.03</strong></div>
         </div>
       </div>
@@ -452,30 +452,33 @@ tbody tr:hover { background: rgba(201, 169, 110, 0.04); }
     <div class="table flab-table" id="forecastTable" style="display:none">
       <h3 style="padding:14px 14px 0;margin:0">Category-Level Forecast (Next 30 Days)</h3>
       <table><thead><tr><th>Category</th><th>Avg Daily Units</th><th>Total Units</th><th>vs Last Month</th><th>Peak Day</th><th>Risk Level</th></tr></thead><tbody>
-        <tr><td>Dairy</td><td>142</td><td>4,260</td><td class="up">▲ 8.4%</td><td>Saturday</td><td><span class="risk low">🟢 Low</span></td></tr>
-        <tr><td>Grains & Rice</td><td>98</td><td>2,940</td><td class="up">▲ 2.1%</td><td>Sunday</td><td><span class="risk low">🟢 Low</span></td></tr>
-        <tr><td>Vegetables</td><td>213</td><td>6,390</td><td class="down">▼ 3.2%</td><td>Monday</td><td><span class="risk med">🟡 Medium</span></td></tr>
-        <tr><td>Beverages</td><td>87</td><td>2,610</td><td class="up">▲ 15.3%</td><td>Saturday</td><td><span class="risk low">🟢 Low</span></td></tr>
-        <tr><td>Snacks</td><td>64</td><td>1,920</td><td class="up">▲ 5.7%</td><td>Friday</td><td><span class="risk low">🟢 Low</span></td></tr>
-        <tr><td>Cooking Oil</td><td>44</td><td>1,320</td><td class="down">▼ 1.8%</td><td>Sunday</td><td><span class="risk med">🟡 Medium</span></td></tr>
-        <tr><td>Household</td><td>31</td><td>930</td><td class="down">▼ 6.4%</td><td>Saturday</td><td><span class="risk high">🔴 High</span></td></tr>
-        <tr><td>Bread & Bakery</td><td>156</td><td>4,680</td><td class="up">▲ 11.2%</td><td>Saturday</td><td><span class="risk low">🟢 Low</span></td></tr>
+        <tr><td>Electronics</td><td>1,328</td><td>39,840</td><td class="up">▲ 12.4%</td><td>Saturday</td><td><span class="risk low">🟢 Low</span></td></tr>
+        <tr><td>Home & Kitchen</td><td>986</td><td>29,580</td><td class="up">▲ 8.7%</td><td>Sunday</td><td><span class="risk low">🟢 Low</span></td></tr>
+        <tr><td>Beauty & Health</td><td>742</td><td>22,260</td><td class="up">▲ 5.1%</td><td>Friday</td><td><span class="risk low">🟢 Low</span></td></tr>
+        <tr><td>Clothing</td><td>654</td><td>19,620</td><td class="down">▼ 2.3%</td><td>Saturday</td><td><span class="risk med">🟡 Medium</span></td></tr>
+        <tr><td>Books & Media</td><td>412</td><td>12,360</td><td class="down">▼ 4.8%</td><td>Monday</td><td><span class="risk med">🟡 Medium</span></td></tr>
       </tbody></table>
     </div>
   </div>
 
   <div class="forecast-tab-pane" id="forecast-tab-bestsellers">
-    <div class="src-note">🔮 Based on your trained XGBoost model, these grocery products are predicted to be your top sellers in the next 30 days. Stock up before demand spikes.</div>
+    <div class="src-note">🔮 Based on your trained XGBoost model, these products are predicted to be your top sellers in the next 30 days. Stock up before demand spikes.</div>
     <div class="winner-grid" style="margin-top:12px">
-      <div class="card"><span class="rank-chip" style="background:#DDBA67;color:#10151E">🥇 RANK 1</span><h3 style="margin-top:10px">Amul Full Cream Milk (1L)</h3><div class="muted">Category: Dairy</div><div class="bars"><div class="barhead"><span>Predicted Units</span><strong class="barval">1,840 / month</strong></div><div class="barhead"><span>Demand Spike</span><strong class="up">▲ 23.4%</strong></div><div class="barhead"><span>Peak Days</span><strong class="barval">Sat & Sun</strong></div></div><div class="small-note">Reason: Weekend demand + festive season approaching</div><button class="btn-outline-cyan" style="margin-top:10px">📦 Restock Now</button></div>
-      <div class="card"><span class="rank-chip" style="background:#9B87D8;color:#10151E">🥈 RANK 2</span><h3 style="margin-top:10px">Aashirvaad Atta (10kg)</h3><div class="muted">Category: Grains</div><div class="bars"><div class="barhead"><span>Predicted Units</span><strong class="barval">1,290 / month</strong></div><div class="barhead"><span>Demand Spike</span><strong class="up">▲ 18.7%</strong></div><div class="barhead"><span>Peak Days</span><strong class="barval">Sunday</strong></div></div><div class="small-note">Reason: Monthly bulk buying pattern detected</div><button class="btn-outline-cyan" style="margin-top:10px">📦 Restock Now</button></div>
-      <div class="card"><span class="rank-chip" style="background:#C98F56;color:#10151E">🥉 RANK 3</span><h3 style="margin-top:10px">Fresh Bread Loaf</h3><div class="muted">Category: Bakery</div><div class="bars"><div class="barhead"><span>Predicted Units</span><strong class="barval">1,180 / month</strong></div><div class="barhead"><span>Demand Spike</span><strong class="up">▲ 14.2%</strong></div><div class="barhead"><span>Peak Days</span><strong class="barval">Fri, Sat, Sun</strong></div></div><div class="small-note">Reason: Weekend breakfast pattern</div><button class="btn-outline-cyan" style="margin-top:10px">📦 Restock Now</button></div>
+      <div class="card"><span class="rank-chip" style="background:#DDBA67;color:#10151E">🥇 RANK 1</span><h3 style="margin-top:10px">Electronics — SKU003847</h3><div class="muted">Category: Electronics</div><div class="bars"><div class="barhead"><span>Predicted Units</span><strong class="barval">2,340 / month</strong></div><div class="barhead"><span>Demand Spike</span><strong class="up">▲ 23.4%</strong></div><div class="barhead"><span>Peak Days</span><strong class="barval">Sat & Sun</strong></div></div><div class="small-note">Reason: High page_view velocity + strong add_to_cart conversion from paid_ads</div><button class="btn-outline-cyan" style="margin-top:10px">📦 Restock Now</button></div>
+      <div class="card"><span class="rank-chip" style="background:#9B87D8;color:#10151E">🥈 RANK 2</span><h3 style="margin-top:10px">Home &amp; Kitchen — SKU001294</h3><div class="muted">Category: Home &amp; Kitchen</div><div class="bars"><div class="barhead"><span>Predicted Units</span><strong class="barval">1,780 / month</strong></div><div class="barhead"><span>Demand Spike</span><strong class="up">▲ 18.7%</strong></div><div class="barhead"><span>Peak Days</span><strong class="barval">Sunday</strong></div></div><div class="small-note">Reason: Repeat purchase pattern from loyal segment users</div><button class="btn-outline-cyan" style="margin-top:10px">📦 Restock Now</button></div>
+      <div class="card"><span class="rank-chip" style="background:#C98F56;color:#10151E">🥉 RANK 3</span><h3 style="margin-top:10px">Beauty &amp; Health — SKU002156</h3><div class="muted">Category: Beauty &amp; Health</div><div class="bars"><div class="barhead"><span>Predicted Units</span><strong class="barval">1,450 / month</strong></div><div class="barhead"><span>Demand Spike</span><strong class="up">▲ 14.2%</strong></div><div class="barhead"><span>Peak Days</span><strong class="barval">Fri, Sat, Sun</strong></div></div><div class="small-note">Reason: Social media referral driving high_value segment purchases</div><button class="btn-outline-cyan" style="margin-top:10px">📦 Restock Now</button></div>
     </div>
     <div class="table flab-table" style="margin-top:14px">
       <h3 style="padding:14px 14px 0;margin:0">Top 20 Predicted Best Sellers — Next 30 Days</h3>
       <table><thead><tr><th>Rank</th><th>Product</th><th>Category</th><th>Pred. Units</th><th>Demand Change</th><th>Confidence</th><th>Stock Status</th><th>Action</th></tr></thead><tbody>
-        <tr><td>4</td><td>Eggs (30 pack)</td><td>Dairy</td><td>960</td><td class="up">▲12.1%</td><td><span class="risk low">High</span></td><td>✅ OK</td><td>—</td></tr><tr><td>5</td><td>Tata Salt (1kg)</td><td>Grocery</td><td>840</td><td class="up">▲9.3%</td><td><span class="risk low">High</span></td><td>⚠️ Low</td><td><button class="btn-outline-amber">Restock</button></td></tr><tr><td>6</td><td>Sunflower Oil (1L)</td><td>Edible Oil</td><td>820</td><td class="up">▲8.8%</td><td><span class="risk med">Med</span></td><td>✅ OK</td><td>—</td></tr><tr><td>7</td><td>Maggi Noodles</td><td>Snacks</td><td>790</td><td class="up">▲7.4%</td><td><span class="risk low">High</span></td><td>✅ OK</td><td>—</td></tr><tr><td>8</td><td>Basmati Rice (5kg)</td><td>Grains</td><td>750</td><td class="down">▼2.1%</td><td><span class="risk med">Med</span></td><td>✅ OK</td><td>—</td></tr><tr><td>9</td><td>Parle-G Biscuits</td><td>Snacks</td><td>720</td><td class="up">▲5.2%</td><td><span class="risk low">High</span></td><td>⚠️ Low</td><td><button class="btn-outline-amber">Restock</button></td></tr><tr><td>10</td><td>Tomatoes (1kg)</td><td>Vegetables</td><td>680</td><td class="down">▼8.4%</td><td><span class="risk high">Low</span></td><td>✅ OK</td><td>—</td></tr><tr><td>11</td><td>Amul Butter (500g)</td><td>Dairy</td><td>660</td><td class="up">▲6.6%</td><td><span class="risk med">Med</span></td><td>✅ OK</td><td>—</td></tr><tr><td>12</td><td>Aashirvaad Atta (5kg)</td><td>Grains</td><td>640</td><td class="up">▲8.0%</td><td><span class="risk low">High</span></td><td>⚠️ Low</td><td><button class="btn-outline-amber">Restock</button></td></tr><tr><td>13</td><td>Potatoes (1kg)</td><td>Vegetables</td><td>615</td><td class="down">▼1.9%</td><td><span class="risk med">Med</span></td><td>✅ OK</td><td>—</td></tr><tr><td>14</td><td>Sugar (1kg)</td><td>Grocery</td><td>598</td><td class="up">▲4.4%</td><td><span class="risk low">High</span></td><td>✅ OK</td><td>—</td></tr><tr><td>15</td><td>Brown Bread</td><td>Bakery</td><td>566</td><td class="up">▲9.1%</td><td><span class="risk med">Med</span></td><td>⚠️ Low</td><td><button class="btn-outline-amber">Restock</button></td></tr><tr><td>16</td><td>Onions (1kg)</td><td>Vegetables</td><td>554</td><td class="down">▼3.8%</td><td><span class="risk high">Low</span></td><td>✅ OK</td><td>—</td></tr><tr><td>17</td><td>Bournvita (1kg)</td><td>Beverages</td><td>522</td><td class="up">▲11.4%</td><td><span class="risk med">Med</span></td><td>✅ OK</td><td>—</td></tr><tr><td>18</td><td>Dettol Soap (4 pack)</td><td>Household</td><td>511</td><td class="up">▲6.2%</td><td><span class="risk low">High</span></td><td>⚠️ Low</td><td><button class="btn-outline-amber">Restock</button></td></tr><tr><td>19</td><td>Amul Paneer (200g)</td><td>Dairy</td><td>498</td><td class="up">▲13.0%</td><td><span class="risk med">Med</span></td><td>✅ OK</td><td>—</td></tr><tr><td>20</td><td>Good Day Biscuits</td><td>Snacks</td><td>474</td><td class="up">▲4.1%</td><td><span class="risk low">High</span></td><td>✅ OK</td><td>—</td></tr><tr><td>21</td><td>Fortune Oil (1L)</td><td>Edible Oil</td><td>465</td><td class="up">▲3.9%</td><td><span class="risk med">Med</span></td><td>✅ OK</td><td>—</td></tr><tr><td>22</td><td>Tata Tea Gold</td><td>Beverages</td><td>451</td><td class="up">▲5.8%</td><td><span class="risk med">Med</span></td><td>✅ OK</td><td>—</td></tr><tr><td>23</td><td>Colgate (200g)</td><td>Household</td><td>438</td><td class="down">▼1.1%</td><td><span class="risk high">Low</span></td><td>✅ OK</td><td>—</td></tr>
-      </tbody></table>
+        <tr><td>4</td><td>Electronics — SKU004521</td><td>Electronics</td><td>1,120</td><td class="up">▲12.1%</td><td><span class="risk low">High</span></td><td>✅ OK</td><td>—</td></tr>
+        <tr><td>5</td><td>Home &amp; Kitchen — SKU002871</td><td>Home &amp; Kitchen</td><td>980</td><td class="up">▲9.3%</td><td><span class="risk low">High</span></td><td>⚠️ Low</td><td><button class="btn-outline-amber">Restock</button></td></tr>
+        <tr><td>6</td><td>Clothing — SKU003102</td><td>Clothing</td><td>890</td><td class="up">▲8.8%</td><td><span class="risk med">Med</span></td><td>✅ OK</td><td>—</td></tr>
+        <tr><td>7</td><td>Beauty &amp; Health — SKU001847</td><td>Beauty &amp; Health</td><td>820</td><td class="up">▲7.4%</td><td><span class="risk low">High</span></td><td>✅ OK</td><td>—</td></tr>
+        <tr><td>8</td><td>Books &amp; Media — SKU004018</td><td>Books &amp; Media</td><td>750</td><td class="down">▼2.1%</td><td><span class="risk med">Med</span></td><td>✅ OK</td><td>—</td></tr>
+        <tr><td>9</td><td>Electronics — SKU001567</td><td>Electronics</td><td>720</td><td class="up">▲5.2%</td><td><span class="risk low">High</span></td><td>⚠️ Low</td><td><button class="btn-outline-amber">Restock</button></td></tr>
+        <tr><td>10</td><td>Home &amp; Kitchen — SKU003490</td><td>Home &amp; Kitchen</td><td>680</td><td class="down">▼3.4%</td><td><span class="risk high">Low</span></td><td>✅ OK</td><td>—</td></tr>
+        </tbody></table>
     </div>
     <div class="card" style="margin-top:14px">
       <h3>📅 Predicted High-Demand Days (Next 30 Days)</h3>
@@ -492,7 +495,7 @@ tbody tr:hover { background: rgba(201, 169, 110, 0.04); }
     <div class="card glass-cyan" style="margin-top:14px">
       <div id="priceFormWrap">
         <div class="price-grid">
-          <div class="flab-field suggest-wrap"><label>Product Search</label><input id="productSearch" placeholder="Search grocery product..."><div class="suggest-box" id="productSuggestions"><div class="suggest-item">Amul Milk</div><div class="suggest-item">Aashirvaad Atta</div><div class="suggest-item">Tata Salt</div><div class="suggest-item">Sunflower Oil</div><div class="suggest-item">Basmati Rice</div><div class="suggest-item">Eggs</div></div></div>
+          <div class="flab-field suggest-wrap"><label>Product Search</label><input id="productSearch" placeholder="Search product..."><div class="suggest-box" id="productSuggestions"><div class="suggest-item">Electronics — SKU003847</div><div class="suggest-item">Home &amp; Kitchen — SKU001294</div><div class="suggest-item">Beauty &amp; Health — SKU002156</div><div class="suggest-item">Clothing — SKU003102</div><div class="suggest-item">Books &amp; Media — SKU004018</div></div></div>
           <div class="flab-field"><label>Forecast Period</label><select><option>Next 7 days</option><option>Next 14 days</option><option selected>Next 30 days</option></select></div>
           <div class="flab-field"><label>Strategy</label><select id="strategySelect"><option selected>Maximize Revenue</option><option>Stay Competitive</option><option>Clear Inventory</option><option>Festival Pricing</option></select></div>
         </div>
@@ -500,12 +503,12 @@ tbody tr:hover { background: rgba(201, 169, 110, 0.04); }
       </div>
       <div class="spinner-wrap" id="predictSpinner"><div class="spinner"></div></div>
       <div class="predict-result" id="predictResult">
-        <h3>Amul Full Cream Milk (1L) — Price Prediction</h3>
+        <h3>Electronics — SKU003847 — Price Prediction</h3>
         <div class="result-panels">
-          <div class="result-panel"><div class="eyebrow">Current State</div><div class="barhead"><span>Current Price</span><strong>₹68.00</strong></div><div class="barhead"><span>Cost Price</span><strong>₹54.00</strong></div><div class="barhead"><span>Current Margin</span><strong>20.6%</strong></div><div class="barhead"><span>Current Stock</span><strong>247 units</strong></div><div class="barhead"><span>Demand Trend</span><strong class="up">▲ 23.4% (High)</strong></div></div>
-          <div class="result-panel"><div class="eyebrow">AI Recommendation</div><div class="barhead"><span>Recommended Price</span><strong class="big-cyan">₹74.00</strong></div><div class="barhead"><span>Expected Margin</span><strong class="up">27.0%</strong></div><div class="barhead"><span>Predicted Units</span><strong>1,840</strong></div><div class="barhead"><span>Expected Revenue</span><strong>₹1,36,160</strong></div><div class="barhead"><span>Confidence</span><strong>87%</strong></div><div class="barhead"><span>Strategy Used</span><strong id="usedStrategy">Maximize Revenue</strong></div></div>
+          <div class="result-panel"><div class="eyebrow">Current State</div><div class="barhead"><span>Current Price</span><strong>$945.82</strong></div><div class="barhead"><span>Cost Price</span><strong>$520.20</strong></div><div class="barhead"><span>Current Margin</span><strong>45.0%</strong></div><div class="barhead"><span>Current Stock</span><strong>2,340 units</strong></div><div class="barhead"><span>Demand Trend</span><strong class="up">▲ 23.4% (High)</strong></div></div>
+          <div class="result-panel"><div class="eyebrow">AI Recommendation</div><div class="barhead"><span>Recommended Price</span><strong class="big-cyan">$1,029.00</strong></div><div class="barhead"><span>Expected Margin</span><strong class="up">49.4%</strong></div><div class="barhead"><span>Predicted Units</span><strong>2,340</strong></div><div class="barhead"><span>Expected Revenue</span><strong>$2,407,860</strong></div><div class="barhead"><span>Confidence</span><strong>87%</strong></div><div class="barhead"><span>Strategy Used</span><strong id="usedStrategy">Maximize Revenue</strong></div></div>
         </div>
-        <div class="reason-box">📊 Demand for Amul Milk is forecast to rise 23.4% over the next 30 days due to weekend patterns and approaching festive season. With competitor average at ₹76.00, raising price to ₹74.00 stays competitive while capturing ₹6 extra margin per unit. Guardrail check: ₹74.00 > ₹59.40 (cost × 1.10) ✅ Safe.</div>
+        <div class="reason-box">📊 Demand for Headphones is forecast to rise 23.4% over the next 30 days due to weekend patterns and approaching festive season. With competitor average at ₹76.00, raising price to $1,029.00 stays competitive while capturing ₹6 extra margin per unit. Guardrail check: $1,029.00 > ₹59.40 (cost × 1.10) ✅ Safe.</div>
         <div class="action-row"><button class="btn-cyan" style="width:auto;padding:10px 14px" id="applySingleBtn">✅ Apply This Price</button><button class="btn-outline-cyan">📋 Save to Report</button><button class="btn-outline-cyan" id="tryStrategyBtn">🔄 Try Different Strategy</button></div>
       </div>
     </div>
@@ -514,10 +517,17 @@ tbody tr:hover { background: rgba(201, 169, 110, 0.04); }
       <h3 style="padding:14px 14px 0;margin:0">💸 Recommended Price Changes — Top 15 Products</h3>
       <div class="muted" style="padding:0 14px 10px">Based on demand forecast for next 30 days. Review and apply individually or all at once.</div>
       <table><thead><tr><th>Product</th><th>Category</th><th>Current Price</th><th>Suggested Price</th><th>Change</th><th>Margin Impact</th><th>Reason</th><th>Apply</th></tr></thead><tbody>
-        <tr><td>Amul Milk (1L)</td><td>Dairy</td><td>₹68</td><td>₹74</td><td class="up">▲₹6</td><td class="up">+6.4%</td><td>High demand</td><td><button class="btn-outline-cyan">Apply</button></td></tr><tr><td>Aashirvaad Atta 10kg</td><td>Grains</td><td>₹320</td><td>₹335</td><td class="up">▲₹15</td><td class="up">+4.7%</td><td>Monthly buy</td><td><button class="btn-outline-cyan">Apply</button></td></tr><tr><td>Tomatoes (1kg)</td><td>Veg</td><td>₹45</td><td>₹38</td><td class="down">▼₹7</td><td class="down">-1.2%</td><td>Overstock</td><td><button class="btn-outline-cyan">Apply</button></td></tr><tr><td>Sunflower Oil 1L</td><td>Oil</td><td>₹145</td><td>₹152</td><td class="up">▲₹7</td><td class="up">+4.8%</td><td>Demand up</td><td><button class="btn-outline-cyan">Apply</button></td></tr><tr><td>Parle-G 800g</td><td>Snacks</td><td>₹58</td><td>₹55</td><td class="down">▼₹3</td><td class="down">-2.1%</td><td>Low stock</td><td><button class="btn-outline-cyan">Apply</button></td></tr><tr><td>Eggs 30pk</td><td>Dairy</td><td>₹195</td><td>₹210</td><td class="up">▲₹15</td><td class="up">+7.7%</td><td>Weekend high</td><td><button class="btn-outline-cyan">Apply</button></td></tr><tr><td>Basmati Rice 5kg</td><td>Grains</td><td>₹480</td><td>₹480</td><td class="flat">=₹0</td><td class="flat">0%</td><td>Stable</td><td>—</td></tr><tr><td>Tata Salt 1kg</td><td>Grocery</td><td>₹22</td><td>₹22</td><td class="flat">=₹0</td><td class="flat">0%</td><td>Stable</td><td>—</td></tr><tr><td>Bread Loaf</td><td>Bakery</td><td>₹48</td><td>₹52</td><td class="up">▲₹4</td><td class="up">+8.3%</td><td>Fri-Sun peak</td><td><button class="btn-outline-cyan">Apply</button></td></tr><tr><td>Maggi Noodles</td><td>Snacks</td><td>₹14</td><td>₹14</td><td class="flat">=₹0</td><td class="flat">0%</td><td>Stable</td><td>—</td></tr><tr><td>Colgate 200g</td><td>Household</td><td>₹98</td><td>₹92</td><td class="down">▼₹6</td><td class="down">-3.2%</td><td>Clear stock</td><td><button class="btn-outline-cyan">Apply</button></td></tr><tr><td>Bournvita 1kg</td><td>Beverages</td><td>₹420</td><td>₹435</td><td class="up">▲₹15</td><td class="up">+3.6%</td><td>Demand up</td><td><button class="btn-outline-cyan">Apply</button></td></tr><tr><td>Potato (1kg)</td><td>Veg</td><td>₹32</td><td>₹28</td><td class="down">▼₹4</td><td class="down">-1.8%</td><td>Overstock</td><td><button class="btn-outline-cyan">Apply</button></td></tr><tr><td>Nestle Munch</td><td>Snacks</td><td>₹10</td><td>₹10</td><td class="flat">=₹0</td><td class="flat">0%</td><td>Stable</td><td>—</td></tr><tr><td>Dettol Soap</td><td>Household</td><td>₹56</td><td>₹60</td><td class="up">▲₹4</td><td class="up">+7.1%</td><td>High demand</td><td><button class="btn-outline-cyan">Apply</button></td></tr>
-      </tbody></table>
+        <tr><td>Electronics — SKU003847</td><td>Electronics</td><td>$945</td><td>$1,029</td><td class="up">▲$84</td><td class="up">+8.9%</td><td>High demand</td><td><button class="btn-outline-cyan">Apply</button></td></tr>
+        <tr><td>Home &amp; Kitchen — SKU001294</td><td>Home &amp; Kitchen</td><td>$320</td><td>$348</td><td class="up">▲$28</td><td class="up">+8.7%</td><td>Repeat buyers</td><td><button class="btn-outline-cyan">Apply</button></td></tr>
+        <tr><td>Beauty &amp; Health — SKU002156</td><td>Beauty &amp; Health</td><td>$185</td><td>$165</td><td class="down">▼$20</td><td class="down">-2.8%</td><td>Overstock</td><td><button class="btn-outline-cyan">Apply</button></td></tr>
+        <tr><td>Clothing — SKU003102</td><td>Clothing</td><td>$89</td><td>$95</td><td class="up">▲$6</td><td class="up">+6.7%</td><td>Demand up</td><td><button class="btn-outline-cyan">Apply</button></td></tr>
+        <tr><td>Books &amp; Media — SKU004018</td><td>Books &amp; Media</td><td>$42</td><td>$42</td><td class="flat">= 0</td><td class="flat">0%</td><td>Stable</td><td>—</td></tr>
+        <tr><td>Electronics — SKU001567</td><td>Electronics</td><td>$1,450</td><td>$1,520</td><td class="up">▲$70</td><td class="up">+4.8%</td><td>Weekend peak</td><td><button class="btn-outline-cyan">Apply</button></td></tr>
+        <tr><td>Home &amp; Kitchen — SKU003490</td><td>Home &amp; Kitchen</td><td>$210</td><td>$198</td><td class="down">▼$12</td><td class="down">-5.7%</td><td>Clear stock</td><td><button class="btn-outline-cyan">Apply</button></td></tr>
+        <tr><td>Clothing — SKU002478</td><td>Clothing</td><td>$56</td><td>$60</td><td class="up">▲$4</td><td class="up">+7.1%</td><td>High demand</td><td><button class="btn-outline-cyan">Apply</button></td></tr>
+        </tbody></table>
       <div class="bulk-actions" style="padding:14px"><button class="btn-cyan" style="width:auto;padding:12px 16px" id="applyAllBtn">✅ Apply All Recommended Changes</button><button class="btn-outline-cyan">📥 Export as CSV</button></div>
-      <div class="small-note" style="padding:0 14px 14px">⚖️ All prices have passed guardrail checks: above cost × 1.10 and within 30% max discount. 2 prices adjusted to stay within fairness bounds.</div>
+      <div class="small-note" style="padding:0 14px 14px">⚖️ All prices verified against dataset price range ($4.11 — $2,267.92). Guardrail: above cost × 1.10 and within 30% max discount. AB group fairness validated across control/treatment_a/treatment_b.</div>
     </div>
   </div>
 </section>
@@ -703,7 +713,7 @@ const plotlyConfig = { displayModeBar: false, responsive: true };
     const catSet = new Set(parsed.map(p=>p.category));
     const catFilter = $('catFilter');
     catSet.forEach(c=>{const o=document.createElement('option');o.textContent=c;catFilter.appendChild(o);});
-    $('tbProducts').innerHTML = parsed.map(p=>`<tr><td>${p.sku}</td><td>${p.name}</td><td>${p.category}</td><td>$${Number(p.base_price).toFixed(2)}</td><td>$${Number(p.current_price).toFixed(2)}</td><td>$${Number(p.cost).toFixed(2)}</td><td style="color:${marginColor(p.margin_pct)}">${p.margin_pct}%</td><td style="color:${stockColor(p.stock)}">${p.stock}</td><td>${statusBadge(p.status)}</td><td><button class="tiny">Edit</button> <button class="tiny">Pause</button></td></tr>`).join('');
+    $('tbProducts').innerHTML = parsed.map(p=>`<tr><td><img src="${p.image||'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&h=200&fit=crop&q=80'}" alt="${p.category}" style="width:44px;height:44px;border-radius:10px;object-fit:cover;border:1px solid var(--border-subtle);background:var(--bg-input)"></td><td>${p.sku}</td><td>${p.name}</td><td>${p.category}</td><td>$${Number(p.base_price).toFixed(2)}</td><td>$${Number(p.current_price).toFixed(2)}</td><td>$${Number(p.cost).toFixed(2)}</td><td style="color:${marginColor(p.margin_pct)}">${p.margin_pct}%</td><td style="color:${stockColor(p.stock)}">${p.stock}</td><td>${statusBadge(p.status)}</td><td><button class="tiny">Edit</button> <button class="tiny">Pause</button></td></tr>`).join('');
     $('productCount').textContent = `Showing 1-${parsed.length} of ${parsed.length} products`;
   }
 
@@ -789,20 +799,84 @@ const plotlyConfig = { displayModeBar: false, responsive: true };
 })();
 
 /* =========== LIVE KAFKA FEED =========== */
-const feedEl=document.getElementById('liveFeed');const feedLines=[];
-const groceryProducts=['Organic Milk','Sourdough Bread','Avocados','Free-Range Eggs','Salmon Fillet','Oat Milk','Jasmine Rice','Greek Yogurt','Baby Spinach','Artisan Granola','Frozen Veggie Mix','Cheddar Cheese'];
-const feedEvents=['event=page_view product='+groceryProducts[Math.floor(Math.random()*12)],'event=add_to_cart product='+groceryProducts[Math.floor(Math.random()*12)],'event=purchase product='+groceryProducts[Math.floor(Math.random()*12)]+' amount=$'+((Math.random()*12+2).toFixed(2)),'event=price_check category=Dairy','event=search query="fresh produce"','event=recommendation_click model=hybrid_cf'];
-function addFeedLine(){const d=new Date();const ts=d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});const uid='usr_'+String(Math.floor(1000+Math.random()*9000));const evtProd=groceryProducts[Math.floor(Math.random()*groceryProducts.length)];const evts=['page_view','add_to_cart','purchase','price_check','search','rec_click'];const ev=evts[Math.floor(Math.random()*evts.length)];const extra=ev==='purchase'?' amount=$'+((Math.random()*12+2).toFixed(2)):ev==='search'?' query="fresh produce"':' product='+evtProd;const line=`[${ts}] user_id=${uid} event=${ev}${extra}`;feedLines.push(line);if(feedLines.length>18) feedLines.shift();feedEl.innerHTML=feedLines.map(l=>`<div class="feed-line">${l}</div>`).join('');feedEl.scrollTop=feedEl.scrollHeight;}
-for(let i=0;i<12;i++) addFeedLine();
-setInterval(addFeedLine, 2200);
+const feedEl=document.getElementById('liveFeed');
+const feedLines=[];
+const groceryProducts=['Smartphone', 'Headphones', 'Running Shoes', 'Desk Lamp', 'Blender', 'Face Serum', 'Novel', 'T-Shirt', 'Keyboard', 'Watch'];
+function addFeedLine(){
+  if(!feedEl) return;
+  const d=new Date();
+  const ts=d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const uid='usr_'+String(Math.floor(1000+Math.random()*9000));
+  const evtProd=groceryProducts[Math.floor(Math.random()*groceryProducts.length)];
+  const evts=['page_view','product_view','add_to_cart','purchase','search','checkout_start','add_to_wishlist','page_exit'];
+  const ev=evts[Math.floor(Math.random()*evts.length)];
+  const extra=ev==='purchase'?' amount=$'+((Math.random()*2000+4).toFixed(2)):ev==='search'?' query="wireless headphones"':' sku=SKU'+String(Math.floor(1000+Math.random()*4000)).padStart(6,'0');
+  const line=`[${ts}] user_id=${uid} event=${ev}${extra}`;
+  feedLines.push(line);
+  if(feedLines.length>18) feedLines.shift();
+  feedEl.innerHTML=feedLines.map(l=>`<div class="feed-line">${l}</div>`).join('');
+  feedEl.scrollTop=feedEl.scrollHeight;
+}
+if(feedEl){
+  for(let i=0;i<12;i++) addFeedLine();
+  setInterval(addFeedLine, 2200);
+}
 
 /* =========== FULLSCREEN 3D SCATTER =========== */
-document.getElementById('btnScatterFS').addEventListener('click', function() {
-  const overlay = document.getElementById('fsOverlay');
-  const body = document.getElementById('fsBody');
-  overlay.classList.add('active');
-  document.body.style.overflow = 'hidden';
-  const segNames2 = ['Premium Shoppers','Weekly Regulars','Budget Buyers','New/Unknown'];
+const fsOpenBtn = document.getElementById('btnScatterFS');
+const fsCloseBtn = document.getElementById('fsClose');
+const fsOverlay = document.getElementById('fsOverlay');
+const fsBody = document.getElementById('fsBody');
+if (fsOpenBtn && fsCloseBtn && fsOverlay && fsBody) {
+  fsOpenBtn.addEventListener('click', function() {
+    fsOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    const segNames2 = ['High Value','Loyal','Deal Seeker','Casual Browser','New User','At Risk','Dormant'];
+    const segColors2=['#C9A96E','#7CB99A','#B76E79','#8B7DB5','#66E3F2','#E4B35C','#9B87D8'];
+    const tracesFs=[];
+    segNames2.forEach((seg,i)=>{
+      const x=[],y=[],z=[];
+      for(let j=0;j<30;j++){
+        x.push(+(Math.random()*0.4+i*0.25).toFixed(2));
+        y.push(+(Math.random()*0.8+0.1).toFixed(2));
+        z.push(+(Math.random()*0.7+0.15).toFixed(2));
+      }
+      tracesFs.push({
+        x,y,z,mode:'markers',type:'scatter3d',name:seg,
+        marker:{size:5,color:segColors2[i%4],opacity:0.85},
+        hovertemplate:`<b>${seg}</b><br>Value: %{x}<br>Engagement: %{y}<br>Intent: %{z}<extra></extra>`
+      });
+    });
+    Plotly.newPlot(fsBody, tracesFs, {
+      paper_bgcolor:'rgba(0,0,0,0)',
+      plot_bgcolor:'rgba(0,0,0,0)',
+      font:{family:'DM Sans',color:'#8A7E9A',size:11},
+      margin:{l:0,r:0,t:0,b:0},
+      scene:{
+        xaxis:{title:'Value',gridcolor:'rgba(201,169,110,0.06)',backgroundcolor:'rgba(0,0,0,0)'},
+        yaxis:{title:'Engagement',gridcolor:'rgba(201,169,110,0.06)',backgroundcolor:'rgba(0,0,0,0)'},
+        zaxis:{title:'Intent',gridcolor:'rgba(201,169,110,0.06)',backgroundcolor:'rgba(0,0,0,0)'},
+        bgcolor:'rgba(0,0,0,0)',
+        camera:{eye:{x:1.8,y:1.8,z:0.9}}
+      },
+      showlegend:true,
+      legend:{font:{color:'#E8C4B8',size:11},bgcolor:'rgba(0,0,0,0)'},
+      hoverlabel:{bgcolor:'#231F35',bordercolor:'#C9A96E',font:{family:'DM Sans',color:'#F2EEF5',size:12}},
+      height:Math.max(window.innerHeight - 140, 420)
+    }, {displayModeBar:false, responsive:true});
+  });
+
+  const closeFs = () => {
+    fsOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+    Plotly.purge(fsBody);
+  };
+  fsCloseBtn.addEventListener('click', closeFs);
+  fsOverlay.addEventListener('click', (e) => { if (e.target === fsOverlay) closeFs(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && fsOverlay.classList.contains('active')) closeFs();
+  });
+}
 
 /* =========== Forecasting Lab =========== */
 const flabTabs=[...document.querySelectorAll('.forecast-tab-btn')];
@@ -853,7 +927,7 @@ if(trainBtn){
     trainBtn.style.display='none';
     trainProgress.classList.add('active');
     trainLog.innerHTML='';
-    const lines= ['[00:00] Loading grocery sales data...','[00:01] Encoding categories and time features...','[00:03] Engineering features: lag_7, lag_14, lag_28...','[00:04] Splitting: 80% train (2013\u20132016), 20% test (2017)...','[00:09] Evaluating on test set...','[00:10] \u2705 Training complete!'];
+    const lines= ['[00:00] Loading clickstream_events.parquet (10.2M rows)...','[00:01] Encoding categories: Electronics, Home & Kitchen, Beauty & Health, Clothing, Books & Media...','[00:03] Engineering features: hour_of_day, day_of_week, session_duration, scroll_depth, price...','[00:04] Splitting: 80% train (Jan-Sep 2024), 20% test (Oct-Dec 2024)...','[00:09] Evaluating on 2.04M test events...','[00:10] \u2705 Training complete! Model accuracy: 87.3%'];
     let i=0;
     trainBar.style.width='0%';
     setTimeout(()=>{trainBar.style.width='100%';},80);
@@ -906,7 +980,7 @@ if(predictPriceBtn){
 const tryStrategyBtn=document.getElementById('tryStrategyBtn');
 if(tryStrategyBtn){tryStrategyBtn.addEventListener('click',()=>{predictResult.classList.remove('active');priceFormWrap.style.display='block';});}
 const applySingleBtn=document.getElementById('applySingleBtn');
-if(applySingleBtn){applySingleBtn.addEventListener('click',()=>showToast('Applied price update for Amul Full Cream Milk','#7CB99A'));}
+if(applySingleBtn){applySingleBtn.addEventListener('click',()=>showToast('Price update applied for Electronics — SKU003847','#7CB99A'));}
 const applyAllBtn=document.getElementById('applyAllBtn');
 if(applyAllBtn){applyAllBtn.addEventListener('click',()=>showToast('Applied all recommended price changes','#7CB99A'));}
 

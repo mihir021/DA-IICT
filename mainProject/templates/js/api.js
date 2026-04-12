@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = window.location.origin;
 
 /**
  * api.js - Centralized API handler for BasketIQ.
