@@ -17,7 +17,6 @@ from django.contrib.auth.hashers import make_password, check_password
 from bson import ObjectId
 
 from . import mongo_client
-from .ai_planner import generate_plan
 
 
 # ===================================================================
@@ -87,6 +86,9 @@ def profile_page(request):
 
 def cart_page(request):
     return render(request, "cart.html")
+
+def product_page(request, product_id):
+    return render(request, "product.html", {"product_id": product_id})
 
 
 # ===================================================================
@@ -170,8 +172,52 @@ def api_login(request):
 
 
 # ===================================================================
-#  PRODUCTS API
+#  PRODUCTS API (with Dynamic Pricing)
 # ===================================================================
+
+from .dynamic_pricing import calculate_dynamic_price
+
+
+def _get_session_data(request):
+    """Extract session pricing data from the request."""
+    # Session data stored in Django session
+    if not hasattr(request, 'session'):
+        return {"category_views": {}, "total_views": 0, "cart_count": 0}
+    return {
+        "category_views": request.session.get("dp_category_views", {}),
+        "total_views": request.session.get("dp_total_views", 0),
+        "cart_count": request.session.get("dp_cart_count", 0),
+    }
+
+
+def _track_product_view(request, category):
+    """Track a product view in the session for dynamic pricing."""
+    if not hasattr(request, 'session'):
+        return
+    views = request.session.get("dp_category_views", {})
+    views[category] = views.get(category, 0) + 1
+    request.session["dp_category_views"] = views
+    request.session["dp_total_views"] = request.session.get("dp_total_views", 0) + 1
+    request.session.modified = True
+
+
+def _apply_dynamic_pricing(products, session_data):
+    """Apply dynamic pricing to a list of product dicts."""
+    for p in products:
+        dp = calculate_dynamic_price(
+            base_price=p.get("price", 0),
+            existing_discount_pct=p.get("discount", 0),
+            category=p.get("category", "Other"),
+            is_best_seller=p.get("is_best_seller", False),
+            session_data=session_data,
+        )
+        p["dynamic_price"] = dp["final_price"]
+        p["effective_discount"] = dp["effective_discount"]
+        p["savings"] = dp["savings"]
+        p["dynamic_adjustment"] = dp["dynamic_adjustment"]
+        p["pricing_factors"] = dp["factors"]
+    return products
+
 
 @csrf_exempt
 def api_products(request):
@@ -186,26 +232,141 @@ def api_products(request):
     query = {}
     if search:
         pattern = _re.compile(_re.escape(search), _re.IGNORECASE)
-        query["$or"] = [{"name": pattern}, {"keywords": pattern}]
+        query["$or"] = [{"name": pattern}, {"keywords": pattern}, {"category": pattern}]
     if category and category != "All":
         query["category"] = category
 
     products = list(col.find(query).limit(50))
-    return JsonResponse(_json_serialise(products), safe=False)
+    serialised = _json_serialise(products)
+
+    # Apply dynamic pricing
+    session_data = _get_session_data(request)
+    serialised = _apply_dynamic_pricing(serialised, session_data)
+
+    return JsonResponse(serialised, safe=False)
 
 
 @csrf_exempt
 def api_best_sellers(request):
     col = mongo_client.get_products_collection()
     products = list(col.find({"is_best_seller": True}).limit(12))
-    return JsonResponse(_json_serialise(products), safe=False)
+    serialised = _json_serialise(products)
+    session_data = _get_session_data(request)
+    serialised = _apply_dynamic_pricing(serialised, session_data)
+    return JsonResponse(serialised, safe=False)
 
 
 @csrf_exempt
 def api_offers(request):
     col = mongo_client.get_products_collection()
     products = list(col.find({"discount": {"$gt": 0}}).limit(12))
-    return JsonResponse(_json_serialise(products), safe=False)
+    serialised = _json_serialise(products)
+    session_data = _get_session_data(request)
+    serialised = _apply_dynamic_pricing(serialised, session_data)
+    return JsonResponse(serialised, safe=False)
+
+
+@csrf_exempt
+def api_product_detail(request, product_id):
+    """GET /api/auth/products/<product_id>/ — return a single product with dynamic pricing."""
+    try:
+        col = mongo_client.get_products_collection()
+        product = col.find_one({"_id": ObjectId(product_id)})
+        if not product:
+            return JsonResponse({"error": "Product not found"}, status=404)
+
+        serialised = _json_serialise(product)
+
+        # Track this view for dynamic pricing
+        _track_product_view(request, product.get("category", "Other"))
+
+        # Apply dynamic pricing
+        session_data = _get_session_data(request)
+        dp = calculate_dynamic_price(
+            base_price=serialised.get("price", 0),
+            existing_discount_pct=serialised.get("discount", 0),
+            category=serialised.get("category", "Other"),
+            is_best_seller=serialised.get("is_best_seller", False),
+            session_data=session_data,
+        )
+        serialised["dynamic_price"] = dp["final_price"]
+        serialised["effective_discount"] = dp["effective_discount"]
+        serialised["savings"] = dp["savings"]
+        serialised["dynamic_adjustment"] = dp["dynamic_adjustment"]
+        serialised["pricing_factors"] = dp["factors"]
+
+        return JsonResponse(serialised)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
+
+@csrf_exempt
+def api_product_suggestions(request, product_id):
+    """GET /api/auth/products/<product_id>/suggestions/ — return related products."""
+    try:
+        col = mongo_client.get_products_collection()
+        product = col.find_one({"_id": ObjectId(product_id)})
+        if not product:
+            return JsonResponse({"error": "Product not found"}, status=404)
+
+        # Find products in the same category, excluding the current product
+        suggestions = list(
+            col.find({
+                "category": product.get("category", ""),
+                "_id": {"$ne": ObjectId(product_id)},
+            }).limit(8)
+        )
+
+        # If not enough suggestions, pad with best sellers from other categories
+        if len(suggestions) < 4:
+            extra = list(
+                col.find({
+                    "_id": {"$ne": ObjectId(product_id)},
+                    "is_best_seller": True,
+                }).limit(8 - len(suggestions))
+            )
+            existing_ids = {str(s["_id"]) for s in suggestions}
+            for e in extra:
+                if str(e["_id"]) not in existing_ids:
+                    suggestions.append(e)
+
+        serialised = _json_serialise(suggestions)
+        session_data = _get_session_data(request)
+        serialised = _apply_dynamic_pricing(serialised, session_data)
+        return JsonResponse(serialised, safe=False)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
+
+@csrf_exempt
+def api_track_session(request):
+    """POST /api/session/track/ — Track user session activity for dynamic pricing."""
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+    try:
+        data = json.loads(request.body)
+        action = data.get("action", "")
+
+        if action == "view_product":
+            category = data.get("category", "Other")
+            _track_product_view(request, category)
+
+        elif action == "cart_update":
+            request.session["dp_cart_count"] = data.get("cart_count", 0)
+            request.session.modified = True
+
+        elif action == "reset":
+            request.session["dp_category_views"] = {}
+            request.session["dp_total_views"] = 0
+            request.session["dp_cart_count"] = 0
+            request.session.modified = True
+
+        return JsonResponse({
+            "status": "ok",
+            "session": _get_session_data(request),
+        })
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
 
 
 # ===================================================================
@@ -228,6 +389,7 @@ def api_planner_generate(request):
         return JsonResponse({"error": "Please describe what you want to cook."}, status=400)
 
     try:
+        from .ai_planner import generate_plan
         result = generate_plan(query)
     except Exception as exc:
         return JsonResponse({"error": f"Planner failed: {str(exc)}"}, status=500)
@@ -502,20 +664,142 @@ def api_expense_graph(request, graph_type):
             month_key = d.get("date", datetime.utcnow()).strftime("%Y-%m")
             monthly[month_key] = monthly.get(month_key, 0) + d.get("amount", 0)
         sorted_months = sorted(monthly.keys())
+
+        # Format month labels for readability (e.g. "Apr 2026")
+        month_labels = []
+        for m in sorted_months:
+            try:
+                dt = datetime.strptime(m, "%Y-%m")
+                month_labels.append(dt.strftime("%b %Y"))
+            except Exception:
+                month_labels.append(m)
+
         data = {
-            "data": [{"x": sorted_months, "y": [monthly[m] for m in sorted_months], "type": "bar", "marker": {"color": "#006036"}}],
-            "layout": {"title": "Monthly Expenses", "autosize": True, "margin": {"l": 40, "r": 20, "t": 40, "b": 40}, "paper_bgcolor": "rgba(0,0,0,0)", "plot_bgcolor": "rgba(0,0,0,0)"},
+            "data": [{
+                "x": month_labels,
+                "y": [monthly[m] for m in sorted_months],
+                "type": "scatter",
+                "mode": "lines+markers",
+                "fill": "tozeroy",
+                "fillcolor": "rgba(0,96,54,0.08)",
+                "line": {"color": "#006036", "width": 3, "shape": "spline"},
+                "marker": {"color": "#006036", "size": 8, "symbol": "circle"},
+                "name": "Expenses",
+                "hovertemplate": "%{x}<br>₹%{y:,.0f}<extra></extra>",
+            }],
+            "layout": {
+                "autosize": True,
+                "margin": {"l": 55, "r": 15, "t": 15, "b": 50},
+                "paper_bgcolor": "rgba(0,0,0,0)",
+                "plot_bgcolor": "rgba(0,0,0,0)",
+                "xaxis": {
+                    "title": {"text": "Month", "font": {"size": 12, "color": "#71717a"}},
+                    "gridcolor": "rgba(0,0,0,0.04)",
+                    "tickangle": -30,
+                    "tickfont": {"size": 11, "color": "#52525b"},
+                },
+                "yaxis": {
+                    "title": {"text": "₹ Amount", "font": {"size": 12, "color": "#71717a"}},
+                    "gridcolor": "rgba(0,0,0,0.04)",
+                    "tickfont": {"size": 11, "color": "#52525b"},
+                    "tickprefix": "₹",
+                },
+                "hovermode": "x unified",
+            },
         }
         return JsonResponse(data)
 
     elif graph_type == "category":
+        # Keyword-based classification into grocery categories
+        CATEGORY_KEYWORDS = {
+            "Dairy Products": ["milk", "curd", "paneer", "cheese", "butter", "yogurt", "cream", "ghee", "dahi", "lassi", "buttermilk", "whey"],
+            "Fruits": ["apple", "banana", "mango", "grape", "orange", "papaya", "watermelon", "pomegranate", "guava", "kiwi", "pineapple", "strawberry", "lemon", "lime", "coconut", "fig", "cherry", "fruit"],
+            "Vegetables": ["potato", "tomato", "onion", "carrot", "cabbage", "spinach", "brinjal", "capsicum", "peas", "beans", "cauliflower", "broccoli", "ginger", "garlic", "chilli", "pepper", "corn", "vegetable", "sabzi", "bhindi", "palak", "gobi", "methi", "cucumber", "radish"],
+            "Pulses & Lentils": ["dal", "daal", "dhal", "lentil", "chana", "rajma", "moong", "toor", "masoor", "urad", "pulse", "legume", "bean", "chickpea", "soybean"],
+            "Flour & Grains": ["flour", "atta", "maida", "sooji", "suji", "rava", "besan", "rice", "wheat", "bajra", "jowar", "ragi", "oats", "grain", "cereal", "bread", "roti", "chapati"],
+            "Oil & Ghee": ["oil", "ghee", "mustard oil", "olive oil", "sunflower", "refined", "coconut oil", "sesame oil", "groundnut oil"],
+            "Pantry & Spices": ["salt", "sugar", "spice", "masala", "turmeric", "haldi", "cumin", "jeera", "coriander", "dhaniya", "chilli powder", "garam masala", "sauce", "ketchup", "vinegar", "pickle", "jam", "honey", "noodle", "pasta", "maggi", "biscuit", "papad", "pickle"],
+            "Beverages": ["tea", "coffee", "chai", "juice", "water", "soda", "drink", "cola", "shake", "smoothie"],
+            "Snacks": ["chips", "namkeen", "bhujia", "cookie", "cake", "chocolate", "sweet", "halwa", "ladoo", "snack", "popcorn", "crackers"],
+            "Meat & Eggs": ["chicken", "mutton", "fish", "egg", "prawn", "shrimp", "meat", "pork", "lamb"],
+        }
+
         cats = {}
         for d in docs:
-            cat = d.get("category", "Other")
-            cats[cat] = cats.get(cat, 0) + d.get("amount", 0)
+            title = d.get("title", "").lower().strip()
+            original_category = d.get("category", "Other")
+            matched_cat = None
+
+            # Try to match by title keywords first
+            for cat_name, keywords in CATEGORY_KEYWORDS.items():
+                for kw in keywords:
+                    if kw in title:
+                        matched_cat = cat_name
+                        break
+                if matched_cat:
+                    break
+
+            # Fallback to the original category, or "Other"
+            if not matched_cat:
+                matched_cat = original_category if original_category else "Other"
+
+            cats[matched_cat] = cats.get(matched_cat, 0) + d.get("amount", 0)
+
+        # Sort by value descending for a cleaner pie chart
+        sorted_cats = sorted(cats.items(), key=lambda x: x[1], reverse=True)
+        labels = [c[0] for c in sorted_cats]
+        values = [c[1] for c in sorted_cats]
+
+        # Vibrant color palette for grocery categories
+        category_colors = {
+            "Dairy Products": "#60a5fa",
+            "Fruits": "#f97316",
+            "Vegetables": "#22c55e",
+            "Pulses & Lentils": "#eab308",
+            "Flour & Grains": "#a78bfa",
+            "Oil & Ghee": "#f59e0b",
+            "Pantry & Spices": "#ef4444",
+            "Beverages": "#06b6d4",
+            "Snacks": "#ec4899",
+            "Meat & Eggs": "#b45309",
+            "Grocery": "#006036",
+            "Dining": "#8b5cf6",
+            "Travel": "#14b8a6",
+            "Bills": "#64748b",
+            "Other": "#a1a1aa",
+        }
+        colors = [category_colors.get(l, "#71717a") for l in labels]
+
         data = {
-            "data": [{"labels": list(cats.keys()), "values": list(cats.values()), "type": "pie", "marker": {"colors": ["#006036", "#1b7a4a", "#80d9a0", "#feae2c", "#835500"]}}],
-            "layout": {"title": "Category Breakdown", "autosize": True, "margin": {"l": 20, "r": 20, "t": 40, "b": 20}, "paper_bgcolor": "rgba(0,0,0,0)", "plot_bgcolor": "rgba(0,0,0,0)"},
+            "data": [{
+                "labels": labels,
+                "values": values,
+                "type": "pie",
+                "hole": 0.45,
+                "textinfo": "label+percent",
+                "textposition": "inside",
+                "insidetextorientation": "radial",
+                "marker": {
+                    "colors": colors,
+                    "line": {"color": "#ffffff", "width": 2},
+                },
+                "hovertemplate": "%{label}<br>₹%{value:,.0f} (%{percent})<extra></extra>",
+                "textfont": {"size": 11, "color": "#ffffff"},
+            }],
+            "layout": {
+                "autosize": True,
+                "margin": {"l": 50, "r": 50, "t": 15, "b": 60},
+                "paper_bgcolor": "rgba(0,0,0,0)",
+                "plot_bgcolor": "rgba(0,0,0,0)",
+                "showlegend": True,
+                "legend": {
+                    "orientation": "h",
+                    "y": -0.2,
+                    "x": 0.5,
+                    "xanchor": "center",
+                    "font": {"size": 10, "color": "#52525b"},
+                },
+            },
         }
         return JsonResponse(data)
 

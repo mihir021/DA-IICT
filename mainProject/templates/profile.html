@@ -91,17 +91,11 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-zinc-50">
                     <h3 class="text-sm font-bold text-zinc-400 uppercase mb-4 text-center">Monthly Distribution</h3>
-                    <div id="monthlyGraph"
-                        class="aspect-video bg-zinc-50 rounded-xl flex items-center justify-center overflow-hidden">
-                        <p class="text-zinc-400 italic text-sm">Generating chart...</p>
-                    </div>
+                    <div id="monthlyGraph" style="width:100%; height:300px; background:#fafaf7; border-radius:0.75rem;"></div>
                 </div>
                 <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-zinc-50">
                     <h3 class="text-sm font-bold text-zinc-400 uppercase mb-4 text-center">Category Breakdown</h3>
-                    <div id="categoryGraph"
-                        class="aspect-video bg-zinc-50 rounded-xl flex items-center justify-center overflow-hidden">
-                        <p class="text-zinc-400 italic text-sm">Generating chart...</p>
-                    </div>
+                    <div id="categoryGraph" style="width:100%; height:380px; background:#fafaf7; border-radius:0.75rem;"></div>
                 </div>
             </div>
         </section>
@@ -130,11 +124,18 @@
                                 <label class="block text-xs font-bold text-zinc-400 mb-2 uppercase">Category</label>
                                 <select id="category"
                                     class="w-full px-5 py-4 rounded-2xl bg-zinc-50 border-none focus:ring-2 focus:ring-primary">
-                                    <option value="Grocery">Grocery</option>
-                                    <option value="Dining">Dining</option>
-                                    <option value="Travel">Travel</option>
-                                    <option value="Bills">Bills</option>
-                                    <option value="Other">Other</option>
+                                    <option value="Dairy Products">🥛 Dairy Products</option>
+                                    <option value="Fruits">🍎 Fruits</option>
+                                    <option value="Vegetables">🥬 Vegetables</option>
+                                    <option value="Pulses & Lentils">🫘 Pulses & Lentils</option>
+                                    <option value="Flour & Grains">🌾 Flour & Grains</option>
+                                    <option value="Oil & Ghee">🫒 Oil & Ghee</option>
+                                    <option value="Pantry & Spices">🧂 Pantry & Spices</option>
+                                    <option value="Beverages">☕ Beverages</option>
+                                    <option value="Snacks">🍿 Snacks</option>
+                                    <option value="Meat & Eggs">🥚 Meat & Eggs</option>
+                                    <option value="Grocery">🛒 Grocery (General)</option>
+                                    <option value="Other">📦 Other</option>
                                 </select>
                             </div>
                         </div>
@@ -352,21 +353,27 @@
         }
 
         async function fetchGraphs() {
-            const types = ['monthly', 'category'];
-            for (const type of types) {
-                const data = await api.getExpenseGraph(type);
-                const container = document.getElementById(`${type}Graph`);
-                if (data && !data.error) {
-                    container.innerHTML = '';
-                    const layout = {
-                        autosize: true,
-                        margin: { l: 40, r: 20, t: 40, b: 40 },
-                        paper_bgcolor: 'rgba(0,0,0,0)',
-                        plot_bgcolor: 'rgba(0,0,0,0)',
-                    };
-                    Plotly.newPlot(container, data.data, data.layout, { responsive: true, displayModeBar: false });
-                } else {
-                    container.innerHTML = '<p class="text-zinc-400 italic text-sm">Need more data to show chart</p>';
+            const charts = [
+                { type: 'monthly', id: 'monthlyGraph' },
+                { type: 'category', id: 'categoryGraph' },
+            ];
+            for (const chart of charts) {
+                try {
+                    const data = await api.getExpenseGraph(chart.type);
+                    const el = document.getElementById(chart.id);
+                    if (data && !data.error) {
+                        const layout = Object.assign({}, data.layout || {}, {
+                            autosize: true,
+                        });
+                        Plotly.newPlot(el, data.data, layout, {
+                            responsive: true,
+                            displayModeBar: false,
+                        });
+                    } else {
+                        el.innerHTML = '<p style="color:#a1a1aa; font-style:italic; font-size:0.875rem; text-align:center; padding-top:120px;">Need more data to show chart</p>';
+                    }
+                } catch (err) {
+                    console.error('Graph error:', err);
                 }
             }
         }

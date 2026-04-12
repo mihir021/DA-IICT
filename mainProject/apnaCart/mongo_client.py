@@ -219,7 +219,12 @@ def _get_client():
             _fallback_db = InMemoryDB()
             return None
         try:
-            client = MongoClient(uri, serverSelectionTimeoutMS=2500)
+            client = MongoClient(
+                uri,
+                serverSelectionTimeoutMS=5000,
+                connectTimeoutMS=5000,
+                socketTimeoutMS=10000,
+            )
             client.admin.command("ping")
             _client = client
             _using_fallback = False
