@@ -815,3 +815,55 @@ def api_orders(request):
     orders_col = mongo_client.get_orders_collection()
     docs = list(orders_col.find({"user_id": user_id}).sort("date", -1).limit(50))
     return JsonResponse(_json_serialise(docs), safe=False)
+
+
+# ===================================================================
+#  ML MODEL API
+# ===================================================================
+
+@csrf_exempt
+def api_ml_model_info(request):
+    """GET /api/ml/model-info/ — return ML model metadata and metrics."""
+    try:
+        from .ml_pricing_model import get_model_metadata
+        meta = get_model_metadata()
+        if not meta:
+            return JsonResponse({"error": "No trained model found"}, status=404)
+
+        # Convert feature importances to a serialisable format
+        result = {
+            "model_type": "GradientBoostingRegressor",
+            "library": "scikit-learn",
+            "mae": meta.get("mae"),
+            "r2_score": meta.get("r2_score"),
+            "n_samples": meta.get("n_samples"),
+            "n_train": meta.get("n_train"),
+            "n_test": meta.get("n_test"),
+            "trained_at": meta.get("trained_at"),
+            "feature_importances": [
+                {"feature": f, "importance": round(imp, 4)}
+                for f, imp in meta.get("feature_importances", [])
+            ],
+        }
+        return JsonResponse(result)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@csrf_exempt
+def api_ml_retrain(request):
+    """POST /api/ml/retrain/ — retrain the ML pricing model."""
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+    try:
+        from .ml_pricing_model import train_model
+        metrics = train_model(n_samples=5000)
+        return JsonResponse({
+            "success": True,
+            "mae": metrics["mae"],
+            "r2_score": metrics["r2_score"],
+            "message": f"Model retrained on {metrics['n_samples']} samples. "
+                       f"MAE: {metrics['mae']}, R²: {metrics['r2_score']}",
+        })
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)

@@ -46,4 +46,8 @@ urlpatterns = [
 
     # ── Session Tracking (Dynamic Pricing) ──────────────────────────
     path("api/session/track/", views.api_track_session, name="api_track_session"),
+
+    # ── ML Model API ────────────────────────────────────────────────
+    path("api/ml/model-info/", views.api_ml_model_info, name="api_ml_model_info"),
+    path("api/ml/retrain/", views.api_ml_retrain, name="api_ml_retrain"),
 ]
