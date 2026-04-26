@@ -1,0 +1,230 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block breadcrumb %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="section-header">
+  <div>
+    <div class="section-title">Good morning, <em>{{ admin_name }}</em></div>
+    <div class="section-sub">Here's what's happening with BasketIQ today.</div>
+  </div>
+  <div class="tab-bar" id="rangeBar" style="width:auto;">
+    <button class="tab-btn active" data-range="7d">7D</button>
+    <button class="tab-btn" data-range="30d">30D</button>
+    <button class="tab-btn" data-range="90d">90D</button>
+  </div>
+</div>
+
+<!-- KPI Grid — 3×2 -->
+<div id="kpiGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+  {% for _ in "123456" %}
+  <div class="kpi-card">
+    <div class="skeleton" style="height:10px;width:55%;margin-bottom:12px;"></div>
+    <div class="skeleton" style="height:28px;width:70%;margin-bottom:10px;"></div>
+    <div class="skeleton" style="height:10px;width:45%;"></div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Charts Row -->
+<div class="grid-2 mt-16">
+  <div class="card">
+    <div class="chart-header">
+      <div class="chart-title">Orders Over Time</div>
+      <div id="revLabel" style="font-size:12px;color:var(--text-muted)">—</div>
+    </div>
+    <div style="position:relative;height:220px;">
+      <canvas id="chartOrders"></canvas>
+    </div>
+  </div>
+  <div class="card">
+    <div class="chart-header">
+      <div class="chart-title">Order Status Split</div>
+    </div>
+    <div style="position:relative;height:220px;">
+      <canvas id="chartStatus"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Orders -->
+<div class="card mt-16">
+  <div class="chart-header">
+    <div class="chart-title">Recent Orders</div>
+    <a href="/admin-panel/orders/" class="btn btn-outline btn-sm">View All →</a>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Order ID</th><th>Customer</th><th>Items</th><th>Amount</th><th>Status</th><th>Date</th>
+      </tr></thead>
+      <tbody id="tbRecent">
+        <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);">Loading recent orders…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Alerts -->
+<div class="card mt-16" id="alertsCard" style="display:none;">
+  <div class="chart-title" style="margin-bottom:14px;">⚠️ Active Alerts</div>
+  <div id="alertsList"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(async () => {
+  let range = '7d';
+  let ordersChart = null, statusChart = null;
+
+  const STATUS_COLORS = {
+    pending:'#C8A84B', confirmed:'#2E86AB', packed:'#8A9E90',
+    delivered:'#27AE60', cancelled:'#C0392B'
+  };
+
+  async function loadDashboard() {
+    const data = await adminFetch('/admin/dashboard/summary?range='+range);
+    if (!data) { showToast('Could not load dashboard data', 'error'); return; }
+
+    // ── 6 KPI Cards ──────────────────────────────────────────────
+    const kpis = [
+      {
+        label:'Revenue (Period)',
+        value:'₹'+(data.kpis.today_revenue||0).toLocaleString(),
+        meta:'in selected range', type:'up', icon:'💰'
+      },
+      {
+        label:'Active Orders',
+        value: data.kpis.active_orders ?? 0,
+        meta:'pending + confirmed + packed', type:'up', icon:'📦'
+      },
+      {
+        label:'Total Orders',
+        value: data.kpis.total_orders ?? 0,
+        meta:'in selected range', type:'up', icon:'🧾'
+      },
+      {
+        label:'Total Products',
+        value: data.kpis.total_products ?? 0,
+        meta:'in catalogue', type:'up', icon:'🏪'
+      },
+      {
+        label:'Total Users',
+        value: data.kpis.total_users ?? 0,
+        meta:'registered accounts', type:'up', icon:'👥'
+      },
+      {
+        label:'Low Stock SKUs',
+        value: data.kpis.low_stock_skus ?? 0,
+        meta:'items need restock', type:'down', icon:'⚠️',
+        warn: (data.kpis.low_stock_skus ?? 0) > 0
+      },
+    ];
+
+    document.getElementById('kpiGrid').innerHTML = kpis.map(k => `
+      <div class="kpi-card" style="${k.warn ? 'border-color:var(--gold);' : ''}">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div class="kpi-label">${k.label}</div>
+          <span style="font-size:18px;opacity:.7">${k.icon}</span>
+        </div>
+        <div class="kpi-value">${k.value}</div>
+        <div class="kpi-footer">
+          <div class="kpi-meta">${k.meta}</div>
+          <span class="badge-${k.type==='up'?'up':'down'}">${k.type==='up'?'↑':'↓'}</span>
+        </div>
+      </div>`).join('');
+
+    // ── Orders Over Time chart ────────────────────────────────────
+    const sales  = data.charts.sales_trends || [];
+    const labels = sales.map(d => d.label);
+    const vals   = sales.map(d => d.revenue || 0);
+    const total  = vals.reduce((a,b)=>a+b,0);
+    document.getElementById('revLabel').textContent = 'Total: ₹'+total.toLocaleString(undefined,{maximumFractionDigits:0});
+
+    if (ordersChart) ordersChart.destroy();
+    ordersChart = new Chart(document.getElementById('chartOrders').getContext('2d'), {
+      type:'line',
+      data:{labels, datasets:[{
+        label:'Revenue', data:vals, borderColor:'#C8A84B',
+        backgroundColor:'rgba(200,168,75,.1)', fill:true,
+        tension:.4, pointRadius:4, pointBackgroundColor:'#C8A84B'
+      }]},
+      options:{responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{
+          x:{grid:{color:'rgba(30,53,40,.8)'}},
+          y:{grid:{color:'rgba(30,53,40,.8)'},ticks:{callback:v=>'₹'+v}}
+        }}
+    });
+
+    // ── Order Status Doughnut ─────────────────────────────────────
+    const statusData = data.charts.order_status || [];
+    const sLabels = statusData.map(d => d.label);
+    const sVals   = statusData.map(d => d.value);
+    const sColors = statusData.map(d => STATUS_COLORS[d.label.toLowerCase()] || '#8A9E90');
+
+    if (statusChart) statusChart.destroy();
+    statusChart = new Chart(document.getElementById('chartStatus').getContext('2d'), {
+      type:'doughnut',
+      data:{labels:sLabels, datasets:[{data:sVals, backgroundColor:sColors, borderWidth:2, borderColor:'#0D1A12'}]},
+      options:{responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom', labels:{padding:14, font:{size:11}, color:'#8A9E90'}}}}
+    });
+
+    // ── Alerts ────────────────────────────────────────────────────
+    const alerts = data.alerts || [];
+    if (alerts.length) {
+      document.getElementById('alertsCard').style.display = 'block';
+      document.getElementById('alertsList').innerHTML = alerts.map(a=>`
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+          <span class="badge badge-${a.severity==='high'?'cancelled':'pending'}">${a.severity}</span>
+          <div><div style="font-size:13px;font-weight:500">${a.headline}</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px">${a.detail}</div></div>
+        </div>`).join('');
+    }
+  }
+
+  // ── Recent Orders Table ───────────────────────────────────────
+  async function loadOrders() {
+    const orders = await adminFetch('/admin/orders/list');
+    if (!orders || !orders.length) {
+      document.getElementById('tbRecent').innerHTML =
+        '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);">No orders yet.</td></tr>';
+      return;
+    }
+    const recent = orders.slice(0, 10);
+    document.getElementById('tbRecent').innerHTML = recent.map(o => {
+      const id       = o.order_id || (o._id ? o._id.slice(-8).toUpperCase() : '—');
+      const customer = o.user_name || o.user_email || (o.user_id ? '…'+o.user_id.slice(-6) : 'Guest');
+      const dateRaw  = o.date || o.created_at || '';
+      const dateStr  = dateRaw ? dateRaw.toString().slice(0,10) : '—';
+      const status   = (o.status || 'pending').toLowerCase();
+      return `<tr>
+        <td class="td-mono">${id}</td>
+        <td class="td-name">${customer}</td>
+        <td>${(o.items||[]).length} items</td>
+        <td class="td-mono">₹${(o.total_amount||0).toLocaleString()}</td>
+        <td><span class="badge badge-${status}" style="background:${STATUS_COLORS[status]||'#8A9E90'}22;color:${STATUS_COLORS[status]||'#8A9E90'}">${o.status||'Pending'}</span></td>
+        <td style="color:var(--text-muted);font-size:12px">${dateStr}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── Range buttons ─────────────────────────────────────────────
+  document.querySelectorAll('#rangeBar .tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#rangeBar .tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      range = btn.dataset.range;
+      document.getElementById('kpiGrid').innerHTML =
+        '<div class="kpi-card"><div class="skeleton" style="height:80px"></div></div>'.repeat(6);
+      loadDashboard();
+    });
+  });
+
+  await loadDashboard();
+  await loadOrders();
+})();
+</script>
+{% endblock %}

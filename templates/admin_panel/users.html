@@ -1,0 +1,104 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Users{% endblock %}
+{% block breadcrumb %}Users{% endblock %}
+
+{% block content %}
+<div class="section-header">
+  <div>
+    <div class="section-title"><em>User</em> Management</div>
+    <div class="section-sub">All registered users — search, filter, and view profiles.</div>
+  </div>
+  <div style="font-size:13px;color:var(--text-muted)">Total: <span class="text-gold fw-700" id="userCount">—</span></div>
+</div>
+
+<!-- Filters -->
+<div class="card" style="padding:14px 20px;margin-bottom:14px;">
+  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+    <div class="search-wrap" style="flex:1;min-width:200px;">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input class="input w-full" id="userSearch" placeholder="Search name or email…">
+    </div>
+    <select class="input select-input" id="sortUsers" style="width:180px;">
+      <option value="created_at">Sort: Newest First</option>
+      <option value="name">Sort: Name A–Z</option>
+      <option value="email">Sort: Email A–Z</option>
+    </select>
+  </div>
+</div>
+
+<div class="card" style="padding:0;">
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Avatar</th><th>Name</th><th>Email</th><th>Location</th>
+        <th>Auth</th><th>Joined</th>
+      </tr></thead>
+      <tbody id="usersTable">
+        <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">Loading users…</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--border);">
+    <div style="font-size:12px;color:var(--text-muted)" id="userPageInfo">—</div>
+    <div style="display:flex;gap:6px;">
+      <button class="btn btn-outline btn-sm" onclick="changePage(-1)">← Prev</button>
+      <button class="btn btn-outline btn-sm" onclick="changePage(1)">Next →</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let allUsers=[], filtered=[], page=1;
+const PER_PAGE=20;
+
+(async()=>{
+  const users = await adminFetch('/admin/users/list');
+  if(!users) return;
+  allUsers = users;
+  document.getElementById('userCount').textContent = users.length;
+  filtered = users;
+  renderTable();
+})();
+
+function renderTable(){
+  const start=(page-1)*PER_PAGE, end=start+PER_PAGE;
+  const slice=filtered.slice(start,end);
+  document.getElementById('userPageInfo').textContent=`Showing ${start+1}–${Math.min(end,filtered.length)} of ${filtered.length}`;
+  if(!slice.length){
+    document.getElementById('usersTable').innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">No users found.</td></tr>';
+    return;
+  }
+  document.getElementById('usersTable').innerHTML=slice.map(u=>{
+    const initials=(u.name||u.email||'?').slice(0,2).toUpperCase();
+    const joined=u.created_at?u.created_at.slice(0,10):'-';
+    const isGoogle=u.auth_provider==='google';
+    return `<tr>
+      <td><div style="width:32px;height:32px;border-radius:50%;background:var(--gold);display:grid;place-items:center;font-size:11px;font-weight:700;color:#0D1A12">${initials}</div></td>
+      <td class="td-name">${u.name||'—'}</td>
+      <td style="font-size:12px;color:var(--text-muted)">${u.email||'—'}</td>
+      <td style="font-size:12px;color:var(--text-muted)">${u.location||'Not provided'}</td>
+      <td>${isGoogle?'<span class="badge badge-active">Google</span>':'<span class="badge badge-pending">Email</span>'}</td>
+      <td class="text-sm text-muted">${joined}</td>
+    </tr>`;
+  }).join('');
+}
+
+function applyFilters(){
+  const q=document.getElementById('userSearch').value.toLowerCase();
+  const sort=document.getElementById('sortUsers').value;
+  filtered=[...allUsers].filter(u=>!q||(u.name||'').toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q));
+  filtered.sort((a,b)=>{
+    if(sort==='name') return (a.name||'').localeCompare(b.name||'');
+    if(sort==='email') return (a.email||'').localeCompare(b.email||'');
+    return 0;
+  });
+  page=1; renderTable();
+}
+
+function changePage(dir){page+=dir;renderTable();}
+document.getElementById('userSearch').addEventListener('input',applyFilters);
+document.getElementById('sortUsers').addEventListener('change',applyFilters);
+</script>
+{% endblock %}

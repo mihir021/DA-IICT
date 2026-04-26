@@ -1,0 +1,350 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Products{% endblock %}
+{% block breadcrumb %}Products{% endblock %}
+
+{% block content %}
+<div class="section-header">
+  <div>
+    <div class="section-title"><em>Product</em> Catalogue</div>
+    <div class="section-sub">Manage inventory, pricing, and stock levels.</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div style="font-size:13px;color:var(--text-muted)">
+      <span class="text-gold fw-700" id="prodCount">—</span> products
+    </div>
+    <button class="btn btn-gold" onclick="openAddModal()">+ Add Product</button>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card" style="padding:14px 20px;margin-bottom:14px;">
+  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+    <div class="search-wrap" style="flex:1;min-width:200px;">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input class="input w-full" id="prodSearch" placeholder="Search products…">
+    </div>
+    <select class="input select-input" id="catFilter" style="width:160px;">
+      <option value="">All Categories</option>
+    </select>
+    <select class="input select-input" id="stockFilter" style="width:160px;">
+      <option value="">All Stock</option>
+      <option value="ok">In Stock</option>
+      <option value="low">Low Stock</option>
+      <option value="none">Out of Stock</option>
+    </select>
+  </div>
+</div>
+
+<!-- Products Table -->
+<div class="card" style="padding:0;">
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th style="width:50px">Img</th><th>Name</th><th>Category</th>
+        <th>Price</th><th>Stock</th><th>Discount</th><th>Actions</th>
+      </tr></thead>
+      <tbody id="prodTable">
+        <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted)">Loading products…</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--border);">
+    <div style="font-size:12px;color:var(--text-muted)" id="prodPageInfo">—</div>
+    <div style="display:flex;gap:6px;">
+      <button class="btn btn-outline btn-sm" onclick="changePage(-1)">← Prev</button>
+      <button class="btn btn-outline btn-sm" onclick="changePage(1)">Next →</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════ ADD PRODUCT MODAL ══════════ -->
+<div id="addModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);" onclick="if(event.target===this)closeAddModal()">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(560px,94vw);background:var(--surface);border:1px solid var(--border-2);border-radius:var(--radius);padding:28px;max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
+      <div class="card-title" style="margin:0;">Add New Product</div>
+      <button onclick="closeAddModal()" style="background:transparent;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;line-height:1;">×</button>
+    </div>
+
+    <form id="addProdForm" onsubmit="submitAddProduct(event)">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+        <div style="grid-column:1/-1;">
+          <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:5px;">PRODUCT NAME *</label>
+          <input class="input w-full" name="name" required placeholder="e.g. Amul Butter">
+          <div class="field-error" id="err-name" style="color:#C0392B;font-size:11px;margin-top:3px;display:none;"></div>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:5px;">CATEGORY *</label>
+          <input class="input w-full" name="category" required placeholder="e.g. Dairy" list="catSuggestions">
+          <datalist id="catSuggestions"></datalist>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:5px;">UNIT *</label>
+          <input class="input w-full" name="unit" required placeholder="e.g. 500g, 1L, 1 dozen">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:5px;">PRICE (₹) *</label>
+          <input class="input w-full" name="price" type="number" min="0" step="0.01" required placeholder="0.00">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:5px;">INITIAL STOCK (units) *</label>
+          <input class="input w-full" name="stock" type="number" min="0" required placeholder="0">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:5px;">DISCOUNT %</label>
+          <input class="input w-full" name="discount_pct" type="number" min="0" max="100" value="0" placeholder="0">
+        </div>
+        <div style="grid-column:1/-1;">
+          <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:5px;">DESCRIPTION</label>
+          <textarea class="input w-full" name="description" rows="2" placeholder="Optional product description" style="resize:vertical;"></textarea>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" name="is_best_seller" id="chkBestSeller">
+          <label for="chkBestSeller" style="font-size:13px;color:var(--text-dim);cursor:pointer;">Mark as Best Seller</label>
+        </div>
+      </div>
+
+      <div id="addError" style="display:none;padding:10px 14px;background:rgba(192,57,43,.15);border:1px solid #C0392B;border-radius:6px;color:#C0392B;font-size:12px;margin-bottom:14px;"></div>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button type="button" class="btn btn-outline" onclick="closeAddModal()">Cancel</button>
+        <button type="submit" class="btn btn-gold" id="addSubmitBtn">Add Product</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- ══════════ RESTOCK MODAL ══════════ -->
+<div id="restockModal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);" onclick="if(event.target===this)closeRestockModal()">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(360px,92vw);background:var(--surface);border:1px solid var(--border-2);border-radius:var(--radius);padding:24px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div class="card-title" style="margin:0;font-size:15px;">Restock Product</div>
+      <button onclick="closeRestockModal()" style="background:transparent;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;line-height:1;">×</button>
+    </div>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:600;color:var(--text)" id="restockProdName">—</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:3px;">Current stock: <span id="restockCurrentQty" style="color:var(--gold);font-weight:700">—</span> units</div>
+    </div>
+    <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:5px;">ADD STOCK QUANTITY</label>
+    <input class="input w-full" id="restockQtyInput" type="number" min="1" value="10" placeholder="Enter quantity to add">
+    <div id="restockError" style="display:none;color:#C0392B;font-size:12px;margin-top:6px;"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+      <button class="btn btn-outline" onclick="closeRestockModal()">Cancel</button>
+      <button class="btn btn-gold" onclick="submitRestock()">+ Add to Stock</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+let allProds = [], filtered = [], page = 1;
+const PER = 20;
+let restockProductId = null;
+
+// ── Load products ──────────────────────────────────────────────
+(async () => {
+  const prods = await adminFetch('/admin/products/list');
+  if (!prods) return;
+  allProds = prods;
+  document.getElementById('prodCount').textContent = prods.length;
+
+  // Populate categories
+  const cats = [...new Set(prods.map(p => p.category || 'Other').filter(Boolean))].sort();
+  const sel  = document.getElementById('catFilter');
+  const dl   = document.getElementById('catSuggestions');
+  cats.forEach(c => {
+    const o = document.createElement('option'); o.textContent = c; o.value = c; sel.appendChild(o);
+    const d = document.createElement('option'); d.value = c; dl.appendChild(d);
+  });
+
+  filtered = prods;
+  renderTable();
+})();
+
+// ── Stock badge ────────────────────────────────────────────────
+function stockBadge(qty) {
+  if (qty === undefined || qty === null)
+    return '<span class="badge badge-pending">Unknown</span>';
+  if (qty <= 0)
+    return '<span style="color:#C0392B;font-weight:700">⛔ Out of Stock</span>';
+  if (qty <= 10)
+    return `<span style="color:#C8A84B;font-weight:700">⚠ ${qty} units</span>`;
+  return `<span style="color:#27AE60;font-weight:600">${qty} units</span>`;
+}
+
+// ── Render table ───────────────────────────────────────────────
+function renderTable() {
+  const start = (page - 1) * PER, end = start + PER;
+  const slice = filtered.slice(start, end);
+  document.getElementById('prodPageInfo').textContent =
+    `Showing ${start+1}–${Math.min(end, filtered.length)} of ${filtered.length}`;
+
+  if (!slice.length) {
+    document.getElementById('prodTable').innerHTML =
+      '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted)">No products found.</td></tr>';
+    return;
+  }
+
+  document.getElementById('prodTable').innerHTML = slice.map(p => {
+    const stock = p.stock_quantity;
+    return `<tr>
+      <td><img src="${p.image_url || p.images?.[0] || ''}" alt="" style="width:36px;height:36px;border-radius:6px;object-fit:cover;background:var(--surface-2)" onerror="this.style.display='none'"></td>
+      <td class="td-name">${p.name || '—'}${p.is_best_seller ? '<span style="font-size:10px;color:var(--gold);margin-left:6px">★ Best</span>' : ''}</td>
+      <td style="color:var(--text-muted);font-size:12px">${p.category || '—'}</td>
+      <td class="td-mono">₹${(p.price || p.base_price || 0).toLocaleString()}</td>
+      <td id="stock-${p._id}">${stockBadge(stock)}</td>
+      <td class="td-mono">${p.discount ? p.discount + '%' : '—'}</td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="openRestockModal('${p._id}','${(p.name||'').replace(/'/g,"\\'")}',${stock||0})" style="white-space:nowrap;">
+          📦 Restock
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Filters ────────────────────────────────────────────────────
+function applyFilters() {
+  const q     = document.getElementById('prodSearch').value.toLowerCase();
+  const cat   = document.getElementById('catFilter').value;
+  const stock = document.getElementById('stockFilter').value;
+  filtered = allProds.filter(p => {
+    const mQ = !q   || (p.name || '').toLowerCase().includes(q);
+    const mC = !cat || p.category === cat;
+    const qty = p.stock_quantity;
+    const mS = !stock
+      || (stock === 'ok'   && qty > 10)
+      || (stock === 'low'  && qty > 0 && qty <= 10)
+      || (stock === 'none' && (qty === 0 || qty === undefined || qty === null));
+    return mQ && mC && mS;
+  });
+  page = 1; renderTable();
+}
+
+function changePage(dir) { page += dir; renderTable(); }
+document.getElementById('prodSearch').addEventListener('input',  applyFilters);
+document.getElementById('catFilter').addEventListener('change', applyFilters);
+document.getElementById('stockFilter').addEventListener('change', applyFilters);
+
+
+// ══════════ ADD PRODUCT MODAL ══════════
+function openAddModal() {
+  document.getElementById('addProdForm').reset();
+  document.getElementById('addError').style.display = 'none';
+  document.getElementById('addModal').style.display = 'block';
+}
+function closeAddModal() {
+  document.getElementById('addModal').style.display = 'none';
+}
+
+async function submitAddProduct(e) {
+  e.preventDefault();
+  const form = e.target;
+  const btn  = document.getElementById('addSubmitBtn');
+  const errBox = document.getElementById('addError');
+  errBox.style.display = 'none';
+  btn.textContent = 'Adding…'; btn.disabled = true;
+
+  const payload = {
+    name:         form.name.value.trim(),
+    category:     form.category.value.trim(),
+    unit:         form.unit.value.trim(),
+    price:        parseFloat(form.price.value) || 0,
+    stock:        parseInt(form.stock.value)    || 0,
+    discount_pct: parseInt(form.discount_pct.value) || 0,
+    description:  form.description.value.trim(),
+    is_best_seller: form.is_best_seller.checked,
+    is_active:    true,
+  };
+
+  try {
+    const res = await fetch(API + '/admin/products/add', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + ADMIN_TOKEN, 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast(data.message, 'success');
+      closeAddModal();
+      // Refresh product list
+      const prods = await adminFetch('/admin/products/list');
+      if (prods) {
+        allProds = prods;
+        document.getElementById('prodCount').textContent = prods.length;
+        filtered = prods; applyFilters();
+      }
+    } else {
+      errBox.textContent = data.error || 'Failed to add product.';
+      errBox.style.display = 'block';
+    }
+  } catch (err) {
+    errBox.textContent = 'Network error. Please try again.';
+    errBox.style.display = 'block';
+  }
+
+  btn.textContent = 'Add Product'; btn.disabled = false;
+}
+
+
+// ══════════ RESTOCK MODAL ══════════
+function openRestockModal(id, name, currentStock) {
+  restockProductId = id;
+  document.getElementById('restockProdName').textContent = name;
+  document.getElementById('restockCurrentQty').textContent = currentStock ?? 'Unknown';
+  document.getElementById('restockQtyInput').value = 10;
+  document.getElementById('restockError').style.display = 'none';
+  document.getElementById('restockModal').style.display = 'block';
+}
+function closeRestockModal() {
+  document.getElementById('restockModal').style.display = 'none';
+  restockProductId = null;
+}
+
+async function submitRestock() {
+  if (!restockProductId) return;
+  const qty = parseInt(document.getElementById('restockQtyInput').value);
+  const errDiv = document.getElementById('restockError');
+  errDiv.style.display = 'none';
+
+  if (!qty || qty <= 0) {
+    errDiv.textContent = 'Please enter a positive quantity.';
+    errDiv.style.display = 'block';
+    return;
+  }
+
+  try {
+    const res = await fetch(API + `/admin/products/${restockProductId}/restock`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + ADMIN_TOKEN, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ quantity: qty }),
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast(data.message, 'success');
+      // Update stock cell in-place
+      const cell = document.getElementById('stock-' + restockProductId);
+      if (cell) cell.innerHTML = stockBadge(data.new_stock);
+      // Update allProds cache
+      const p = allProds.find(x => x._id === restockProductId);
+      if (p) p.stock_quantity = data.new_stock;
+      closeRestockModal();
+    } else {
+      errDiv.textContent = data.error || 'Restock failed.';
+      errDiv.style.display = 'block';
+    }
+  } catch (err) {
+    errDiv.textContent = 'Network error. Please try again.';
+    errDiv.style.display = 'block';
+  }
+}
+
+// Close modals on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeAddModal(); closeRestockModal(); }
+});
+</script>
+{% endblock %}

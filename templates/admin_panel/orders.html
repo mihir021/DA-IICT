@@ -1,0 +1,145 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Orders{% endblock %}
+{% block breadcrumb %}Orders{% endblock %}
+
+{% block content %}
+<div class="section-header">
+  <div>
+    <div class="section-title"><em>Orders</em> &amp; Transactions</div>
+    <div class="section-sub">All customer orders — filter, search, and manage.</div>
+  </div>
+  <button class="btn btn-outline" onclick="exportCSV()">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Export CSV
+  </button>
+</div>
+
+<!-- Summary strip -->
+<div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px;" id="orderSummary">
+  <div class="kpi-card"><div class="kpi-label">Total Orders</div><div class="kpi-value" id="sumTotal">—</div></div>
+  <div class="kpi-card"><div class="kpi-label">Total Revenue</div><div class="kpi-value" id="sumRevenue">—</div></div>
+  <div class="kpi-card"><div class="kpi-label">Avg Order Value</div><div class="kpi-value" id="sumAvg">—</div></div>
+</div>
+
+<!-- Filters -->
+<div class="card" style="padding:14px 20px;margin-bottom:14px;">
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+    <div class="search-wrap" style="flex:1;min-width:200px;">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input class="input w-full" id="orderSearch" placeholder="Search customer name or email…">
+    </div>
+    <select class="input select-input" id="statusFilter" style="width:160px;">
+      <option value="">All Status</option>
+      <option>pending</option><option>packed</option><option>out_for_delivery</option>
+      <option>delivered</option><option>cancelled</option>
+    </select>
+    <button class="btn btn-outline btn-sm" onclick="applyFilters()">Filter</button>
+    <button class="btn btn-outline btn-sm" onclick="resetFilters()">Reset</button>
+  </div>
+</div>
+
+<div class="card" style="padding:0;">
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Order ID</th><th>Customer</th><th>Items</th>
+        <th>Amount</th><th>Status</th><th>Date</th><th>Action</th>
+      </tr></thead>
+      <tbody id="ordersTable">
+        <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted)">Loading orders…</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <!-- Pagination -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--border);">
+    <div style="font-size:12px;color:var(--text-muted)" id="pageInfo">—</div>
+    <div style="display:flex;gap:6px;">
+      <button class="btn btn-outline btn-sm" id="prevPage" onclick="changePage(-1)">← Prev</button>
+      <button class="btn btn-outline btn-sm" id="nextPage" onclick="changePage(1)">Next →</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let allOrders = [], filtered = [], page = 1;
+const PER_PAGE = 20;
+
+(async () => {
+  const orders = await adminFetch('/admin/orders/list');
+  if (!orders) return;
+  allOrders = orders;
+  computeSummary(orders);
+  filtered = orders;
+  renderTable();
+})();
+
+function computeSummary(orders) {
+  const total = orders.length;
+  const rev = orders.reduce((s,o)=>s+(o.total_amount||0),0);
+  document.getElementById('sumTotal').textContent = total.toLocaleString();
+  document.getElementById('sumRevenue').textContent = '₹'+rev.toLocaleString(undefined,{maximumFractionDigits:0});
+  document.getElementById('sumAvg').textContent = total?'₹'+(rev/total).toFixed(0):'—';
+}
+
+function renderTable() {
+  const start = (page-1)*PER_PAGE, end = start+PER_PAGE;
+  const slice = filtered.slice(start,end);
+  document.getElementById('pageInfo').textContent = `Showing ${start+1}–${Math.min(end,filtered.length)} of ${filtered.length}`;
+  document.getElementById('prevPage').disabled = page<=1;
+  document.getElementById('nextPage').disabled = end>=filtered.length;
+  if (!slice.length) {
+    document.getElementById('ordersTable').innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted)">No orders found.</td></tr>';
+    return;
+  }
+  document.getElementById('ordersTable').innerHTML = slice.map(o=>`
+    <tr>
+      <td class="td-mono" style="color:var(--gold)">#${o._id.slice(-8).toUpperCase()}</td>
+      <td class="td-name">${o.user_name||o.user_email||'Guest'}</td>
+      <td>${(o.items||[]).length}</td>
+      <td class="td-mono">₹${(o.total_amount||0).toLocaleString()}</td>
+      <td><span class="badge badge-${o.status||'pending'}">${o.status||'pending'}</span></td>
+      <td class="text-sm text-muted">${o.created_at?o.created_at.slice(0,10):'-'}</td>
+      <td><button class="btn btn-outline btn-sm" onclick="viewOrder('${o._id}')">View</button></td>
+    </tr>`).join('');
+}
+
+function applyFilters() {
+  const q = document.getElementById('orderSearch').value.toLowerCase();
+  const st = document.getElementById('statusFilter').value;
+  filtered = allOrders.filter(o=>{
+    const matchQ = !q || (o.user_name||'').toLowerCase().includes(q) || (o.user_email||'').toLowerCase().includes(q);
+    const matchS = !st || o.status===st;
+    return matchQ && matchS;
+  });
+  page = 1; renderTable();
+}
+
+function resetFilters() {
+  document.getElementById('orderSearch').value='';
+  document.getElementById('statusFilter').value='';
+  filtered = allOrders; page=1; renderTable();
+}
+
+function changePage(dir) { page+=dir; renderTable(); }
+
+function viewOrder(id) {
+  const o = allOrders.find(x=>x._id===id);
+  if (!o) return;
+  const items = (o.items||[]).map(i=>`${i.name||'Item'} × ${i.quantity||1} @ ₹${i.price||0}`).join(', ');
+  showToast(`Order #${id.slice(-8).toUpperCase()}: ${items||'No items'}`, 'info');
+}
+
+function exportCSV() {
+  const rows = [['Order ID','Customer','Items','Amount','Status','Date']];
+  filtered.forEach(o=>rows.push([o._id.slice(-8).toUpperCase(),o.user_name||o.user_email||'Guest',(o.items||[]).length,o.total_amount||0,o.status||'pending',o.created_at?o.created_at.slice(0,10):'']));
+  const csv = rows.map(r=>r.join(',')).join('\n');
+  const a = document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download='orders.csv'; a.click();
+  showToast('CSV exported', 'success');
+}
+
+document.getElementById('orderSearch').addEventListener('input', applyFilters);
+document.getElementById('statusFilter').addEventListener('change', applyFilters);
+</script>
+{% endblock %}

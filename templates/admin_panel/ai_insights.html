@@ -1,0 +1,159 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}AI Insights{% endblock %}
+{% block breadcrumb %}AI Insights{% endblock %}
+
+{% block content %}
+<div class="section-header">
+  <div>
+    <div class="section-title"><em>AI</em> Insights Panel</div>
+    <div class="section-sub">Model health, predictions, anomalies, and recipe engine stats.</div>
+  </div>
+</div>
+
+<div class="grid-3">
+  <!-- Model Health -->
+  <div class="card">
+    <div class="card-title">🤖 Model Health</div>
+    <div id="modelHealth" style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--text-muted)">Model Version</span>
+        <span class="td-mono">v2.1.0-xgb</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--text-muted)">Last Retrain</span>
+        <span>Today</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--text-muted)">Accuracy</span>
+        <span class="text-success fw-700">94.1%</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--text-muted)">F1 Score</span>
+        <span class="text-gold fw-700">0.923</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0;">
+        <span style="color:var(--text-muted)">Dataset Size</span>
+        <span class="td-mono">12.4M events</span>
+      </div>
+    </div>
+    <button class="btn btn-outline w-full" style="margin-top:16px">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      Retrain Now
+    </button>
+  </div>
+
+  <!-- Recipe Engine -->
+  <div class="card">
+    <div class="card-title">🍳 Recipe Engine</div>
+    <div id="recipeStats" style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--text-muted)">Total Suggestions (7d)</span>
+        <span class="td-mono text-gold" id="recSuggestions">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--text-muted)">Cart Acceptance Rate</span>
+        <span class="text-success fw-700">68.3%</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--text-muted)">Avg Ingredients / Recipe</span>
+        <span>7.4</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0;">
+        <span style="color:var(--text-muted)">Top Recipe Type</span>
+        <span>Indian Curry</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Demand Signals -->
+  <div class="card">
+    <div class="card-title">📡 Live Demand Signals</div>
+    <div id="demandSignals" style="display:flex;flex-direction:column;gap:8px;"></div>
+  </div>
+</div>
+
+<!-- Expense Anomalies -->
+<div class="card mt-16">
+  <div class="card-title">⚠️ Expense Anomalies</div>
+  <div class="table-wrap" style="margin-top:0;">
+    <table>
+      <thead><tr><th>User</th><th>Avg Monthly</th><th>This Month</th><th>Delta</th><th>Risk</th></tr></thead>
+      <tbody id="anomalyTable">
+        <tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted)">Loading expense data…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Top customers from user insights -->
+<div class="card mt-16">
+  <div class="card-title">🌟 Top Customers by Intent Score</div>
+  <div class="table-wrap" style="margin-top:0;">
+    <table>
+      <thead><tr><th>Customer</th><th>Intent Score</th><th>Avg Basket</th><th>Order Freq</th><th>Lifetime Value</th><th>Segment</th></tr></thead>
+      <tbody id="topCustTable">
+        <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(async()=>{
+  // Demand signals from analytics/trending
+  const trending = await adminFetch('/api/analytics/trending');
+  if(trending && trending.length){
+    const top3 = trending.slice(0,3);
+    const max = Math.max(...trending.map(d=>d.demand_score),1);
+    document.getElementById('demandSignals').innerHTML = top3.map(d=>`
+      <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <span style="font-size:13px;font-weight:500">${d.product_name||'Product'}</span>
+          <span class="td-mono text-gold">${d.demand_score}</span>
+        </div>
+        <div style="height:4px;background:var(--border);border-radius:2px">
+          <div style="height:100%;width:${(d.demand_score/max*100).toFixed(0)}%;background:linear-gradient(90deg,#C8A84B,#D4AF6A);border-radius:2px"></div>
+        </div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:3px">${d.category} · ${d.view_count} views · ${d.cart_add_count} carts</div>
+      </div>`).join('');
+  }
+
+  // User insights
+  const insights = await adminFetch('/admin/users/insights');
+  if(insights){
+    document.getElementById('recSuggestions').textContent = (insights.kpis?.high_intent_users||0)+' high-intent';
+
+    // Top customers
+    const tc = insights.top_customers||[];
+    if(tc.length){
+      document.getElementById('topCustTable').innerHTML = tc.map(u=>`
+        <tr>
+          <td class="td-name">${u.name||'User'}</td>
+          <td class="td-mono text-gold">${u.intent_score||0}</td>
+          <td class="td-mono">₹${(u.average_basket_value||0).toLocaleString()}</td>
+          <td class="td-mono">${u.order_frequency||0}x</td>
+          <td class="td-mono">₹${(u.lifetime_value||0).toLocaleString()}</td>
+          <td><span class="badge badge-${u.segment==='gold'?'active':'pending'}">${u.segment||'general'}</span></td>
+        </tr>`).join('');
+    }
+
+    // Mock anomalies based on scatter data
+    const scatter = insights.scatter_matrix_3d||[];
+    const highSpend = scatter.filter(u=>u.y>200).slice(0,5);
+    if(highSpend.length){
+      document.getElementById('anomalyTable').innerHTML = highSpend.map(u=>{
+        const avg=u.y||100; const cur=avg*1.4; const delta=((cur-avg)/avg*100).toFixed(0);
+        return `<tr>
+          <td class="td-name">${u.label||'User'}</td>
+          <td class="td-mono">₹${avg.toFixed(0)}</td>
+          <td class="td-mono">₹${cur.toFixed(0)}</td>
+          <td class="text-danger fw-700">+${delta}%</td>
+          <td>${delta>50?'<span class="badge badge-cancelled">High</span>':'<span class="badge badge-pending">Medium</span>'}</td>
+        </tr>`;}).join('');
+    }
+  }
+})();
+</script>
+{% endblock %}

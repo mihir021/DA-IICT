@@ -3,8 +3,7 @@ import os
 from django.contrib.auth.hashers import check_password
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 
-from database.collections import ADMIN_USERS
-from database.connection import get_database
+from apps.market.mongo_client import get_db
 
 
 TOKEN_MAX_AGE = 60 * 60 * 8
@@ -20,9 +19,9 @@ def _bootstrap_admin_payload() -> dict | None:
 
 
 def authenticate_admin(email: str, password: str) -> dict | None:
-    database = get_database()
+    database = get_db()
     if database is not None:
-        admin = database[ADMIN_USERS].find_one({"email": email, "is_staff": True}, {"_id": 0})
+        admin = database["admin_users"].find_one({"email": email, "is_staff": True}, {"_id": 0})
         if admin and check_password(password, admin.get("password_hash", "")):
             return {"name": admin.get("name", "Admin"), "email": admin["email"], "role": admin.get("role", "operations_admin"), "is_staff": True}
 

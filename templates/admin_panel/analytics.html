@@ -1,0 +1,171 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Analytics{% endblock %}
+{% block breadcrumb %}Analytics{% endblock %}
+
+{% block content %}
+<div class="section-header">
+  <div>
+    <div class="section-title"><em>Analytics</em> &amp; Charts</div>
+    <div class="section-sub">Sales, user growth, categories, and inventory health.</div>
+  </div>
+  <div class="tab-bar" id="rangeBar" style="width:auto;">
+    <button class="tab-btn active" data-range="7d">7D</button>
+    <button class="tab-btn" data-range="30d">30D</button>
+    <button class="tab-btn" data-range="90d">90D</button>
+  </div>
+</div>
+
+<!-- Revenue Trends -->
+<div class="card">
+  <div class="chart-header">
+    <div class="chart-title">Revenue Trends</div>
+    <div style="font-size:12px;color:var(--text-muted)" id="revTotal">—</div>
+  </div>
+  <div style="position:relative;height:200px;">
+    <canvas id="chartRevenue"></canvas>
+  </div>
+</div>
+
+<div class="grid-2 mt-16">
+  <!-- Top Categories -->
+  <div class="card">
+    <div class="chart-title" style="margin-bottom:14px;">Top Categories by Revenue</div>
+    <div style="position:relative;height:220px;">
+      <canvas id="chartCategories"></canvas>
+    </div>
+  </div>
+  <!-- Order Status -->
+  <div class="card">
+    <div class="chart-title" style="margin-bottom:14px;">Order Status Breakdown</div>
+    <div style="position:relative;height:220px;">
+      <canvas id="chartOrderStatus"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="grid-2 mt-16">
+  <!-- Inventory Health -->
+  <div class="card">
+    <div class="chart-title" style="margin-bottom:14px;">Inventory Health</div>
+    <div style="position:relative;height:220px;">
+      <canvas id="chartInventory"></canvas>
+    </div>
+  </div>
+  <!-- Demand Trending -->
+  <div class="card">
+    <div class="chart-title" style="margin-bottom:14px;">Top Trending Products</div>
+    <div id="trendingList" style="display:flex;flex-direction:column;gap:10px;margin-top:4px;"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let charts = {};
+const COLORS = ['#C8A84B','#27AE60','#8A9E90','#C0392B','#D4AF6A','#1E3528'];
+
+function destroyChart(id){ if(charts[id]){ charts[id].destroy(); } }
+
+async function loadAnalytics(range) {
+  const data = await adminFetch('/admin/dashboard/summary?range='+range);
+  if (!data) return;
+
+  // Revenue trend
+  destroyChart('rev');
+  const sales = data.charts.sales_trends || [];
+  const revTotal = sales.reduce((s,d)=>s+(d.revenue||0),0);
+  document.getElementById('revTotal').textContent = 'Total: ₹'+revTotal.toLocaleString(undefined,{maximumFractionDigits:0});
+  charts['rev'] = new Chart(document.getElementById('chartRevenue'),{
+    type:'line',
+    data:{labels:sales.map(d=>d.label),datasets:[{
+      label:'Revenue',data:sales.map(d=>d.revenue||0),
+      borderColor:'#C8A84B',backgroundColor:'rgba(200,168,75,.12)',
+      fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#C8A84B'
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'rgba(30,53,40,.8)'}},y:{grid:{color:'rgba(30,53,40,.8)'},ticks:{callback:v=>'₹'+v}}}}
+  });
+
+  // Categories
+  destroyChart('cat');
+  const cats = data.charts.category_performance || [];
+  charts['cat'] = new Chart(document.getElementById('chartCategories'),{
+    type:'bar',
+    data:{labels:cats.map(d=>d.label),datasets:[{
+      label:'Revenue',data:cats.map(d=>d.revenue||0),
+      backgroundColor:COLORS,borderRadius:6
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'rgba(30,53,40,.8)'},ticks:{callback:v=>'₹'+v}},y:{grid:{display:false}}}}
+  });
+
+  // Inventory Health
+  destroyChart('inv');
+  const inv = data.charts.inventory_mix || [];
+  charts['inv'] = new Chart(document.getElementById('chartInventory'),{
+    type:'doughnut',
+    data:{labels:inv.map(d=>d.label),datasets:[{data:inv.map(d=>d.value),backgroundColor:['#27AE60','#C8A84B','#C0392B'],borderWidth:2,borderColor:'#0D1A12'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#8A9E90',padding:12,font:{size:11}}}}}
+  });
+
+  // Order Status Breakdown — doughnut with per-status colors
+  const STATUS_COLORS = {
+    pending:'#C8A84B', confirmed:'#2E86AB', packed:'#8A9E90',
+    delivered:'#27AE60', cancelled:'#C0392B'
+  };
+  const orderStatus = data.charts.order_status || [];
+  const osColors = orderStatus.map(d => STATUS_COLORS[d.label.toLowerCase()] || '#8A9E90');
+  const osTotal  = orderStatus.reduce((s,d)=>s+d.value, 0);
+  destroyChart('os');
+  charts['os'] = new Chart(document.getElementById('chartOrderStatus'),{
+    type:'doughnut',
+    data:{
+      labels:orderStatus.map(d=>d.label+' ('+d.value+')'),
+      datasets:[{data:orderStatus.map(d=>d.value||0.001), backgroundColor:osColors, borderWidth:2, borderColor:'#0D1A12'}]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'bottom',labels:{color:'#8A9E90',padding:10,font:{size:11}}},
+        tooltip:{callbacks:{label:ctx=>{
+          const v = orderStatus[ctx.dataIndex]?.value||0;
+          const pct = osTotal>0 ? ((v/osTotal)*100).toFixed(1) : 0;
+          return ` ${v} orders (${pct}%)`;
+        }}}
+      }
+    }
+  });
+}
+
+// Trending products
+async function loadTrending() {
+  const data = await adminFetch('/api/analytics/trending/');
+  if (!data || !data.length) return;
+  const top = data.slice(0,6);
+  const max = Math.max(...top.map(d=>d.demand_score),1);
+  document.getElementById('trendingList').innerHTML = top.map(d=>`
+    <div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+        <span style="font-weight:500;color:var(--text)">${d.product_name||'Product'}</span>
+        <span class="text-mono" style="color:var(--gold)">${d.demand_score}</span>
+      </div>
+      <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${(d.demand_score/max*100).toFixed(0)}%;background:linear-gradient(90deg,#C8A84B,#D4AF6A);border-radius:3px;transition:width .8s ease"></div>
+      </div>
+      <div style="font-size:10px;color:var(--text-muted);margin-top:2px">${d.category||''} &bull; ${d.view_count||0} views</div>
+    </div>`).join('');
+}
+
+document.querySelectorAll('#rangeBar .tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#rangeBar .tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); loadAnalytics(btn.dataset.range);
+  });
+});
+
+loadAnalytics('7d');
+loadTrending();
+</script>
+{% endblock %}
